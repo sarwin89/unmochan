@@ -31,10 +31,20 @@ def assign_layers_by_axis(
     structure: Structure,
     *,
     axis: int = 2,
+    n_layers: int = 2,
     threshold: float | None = None,
 ) -> NDArray[np.int64]:
-    """Assign atoms to two layers by Cartesian coordinate along one axis."""
+    """Assign atoms to layer-like groups by Cartesian coordinate along one axis."""
 
+    if n_layers < 1:
+        raise ValueError("n_layers must be at least 1")
     coords = structure.cart_coords[:, axis]
-    split = float(np.median(coords) if threshold is None else threshold)
-    return (coords > split).astype(int)
+    if n_layers == 1:
+        return np.zeros(structure.n_sites, dtype=int)
+    if threshold is not None:
+        if n_layers != 2:
+            raise ValueError("threshold is only valid for two-layer assignment")
+        return (coords > float(threshold)).astype(int)
+    quantiles = np.linspace(0.0, 1.0, n_layers + 1)[1:-1]
+    thresholds = np.quantile(coords, quantiles)
+    return np.searchsorted(thresholds, coords, side="right").astype(int)

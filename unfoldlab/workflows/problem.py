@@ -9,6 +9,7 @@ from pathlib import Path
 import numpy as np
 
 from unfoldlab.core.kpoints import KPoint, KPointMapping, fold_kpoints_to_supercell
+from unfoldlab.core.projections import ProjectionSelector, parse_projection_selectors
 from unfoldlab.core.spectral import EffectiveBandStructure
 from unfoldlab.core.structures import Structure
 from unfoldlab.core.transformations import TransformationMatrix, detect_transformation
@@ -65,6 +66,39 @@ class UnfoldingProblem:
             raise ValueError("no primitive k-points were provided")
         return fold_kpoints_to_supercell(points, self.require_transformation())
 
+    def generate_kpoint_mapping(
+        self,
+        primitive_kpoints: Iterable[KPoint] | None = None,
+    ) -> list[KPointMapping]:
+        """Alias for the material-agnostic public API."""
+
+        return self.generate_supercell_kpoints(primitive_kpoints)
+
+    def validate(self) -> dict[str, object]:
+        """Run lightweight structural validation for the current workflow."""
+
+        transform = self.require_transformation()
+        return {
+            "code": self.code,
+            "transformation": transform.to_dict(),
+            "primitive_sites": self.primitive_structure.n_sites,
+            "supercell_sites": self.supercell_structure.n_sites,
+        }
+
+    def unfold(
+        self,
+        *,
+        backend: str = "auto",
+        projections: Iterable[str | ProjectionSelector] | None = None,
+    ) -> EffectiveBandStructure:
+        """Placeholder for future unfolding backends with generic projections."""
+
+        parsed_projections = _normalize_projections(projections or [])
+        raise NotImplementedError(
+            "unfolding backends are not implemented yet; parsed generic "
+            f"projection selectors: {[selector.to_string() for selector in parsed_projections]}"
+        )
+
     def validate_eigenval_kpoints(
         self,
         eigenval: str | Path,
@@ -112,3 +146,16 @@ class UnfoldingProblem:
                 "note": "EIGENVAL energies with caller-provided or unit weights",
             },
         )
+
+
+def _normalize_projections(
+    projections: Iterable[str | ProjectionSelector],
+) -> tuple[ProjectionSelector, ...]:
+    raw: list[str] = []
+    parsed: list[ProjectionSelector] = []
+    for projection in projections:
+        if isinstance(projection, ProjectionSelector):
+            parsed.append(projection)
+        else:
+            raw.append(projection)
+    return tuple(parsed) + parse_projection_selectors(raw)

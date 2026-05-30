@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "unfoldlab"
 version = "0.1.0"
-description = "Research-grade Python toolkit for band unfolding, effective band structures, and twisted/moire electronic-structure analysis."
+description = "Material-agnostic Python toolkit for band unfolding, spectral analysis, and supercell interpretation."
 readme = "README.md"
 requires-python = ">=3.10"
 license = "LicenseRef-Proprietary"

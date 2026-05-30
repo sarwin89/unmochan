@@ -1,6 +1,8 @@
 # UnfoldLab Roadmap
 
 This roadmap condenses the project goal document into implementable milestones.
+The project is material-agnostic: any material-specific tutorial is an instance
+of a general method, not a core design assumption.
 
 ## Milestone 1: Minimal VASP EBS engine
 
@@ -20,10 +22,14 @@ This roadmap condenses the project goal document into implementable milestones.
 - Report missing k-points with tolerance-aware diagnostics.
 - Add sum-rule and normalization checks for weights.
 
-## Milestone 3: Spectral-function plotting and serialization
+## Milestone 3: Spectral-function plotting, projections, and serialization
 
 - Add Gaussian, Lorentzian, and adaptive broadening.
-- Support atom, orbital, layer, and spin filters.
+- Support universal projection selectors for species, atoms, orbitals, layers,
+  sublattices, regions, defect shells, surfaces, interfaces, adsorbates,
+  substrates, molecule-like components, valleys, and spin channels.
+- Add user-defined projection groups through configuration rather than
+  hard-coded material aliases.
 - Serialize large EBS objects to HDF5.
 - Add Matplotlib and Plotly frontends.
 
@@ -33,11 +39,47 @@ This roadmap condenses the project goal document into implementable milestones.
 - Compute plane-wave coefficient unfolding weights.
 - Compare plane-wave and projection-based approximations.
 
-## Milestone 5: Twisted 2D materials
+## Milestone 5: Generic reference-resolved and moire workflows
 
-- Detect layers, twist angles, moire reciprocal lattices, and valley mappings.
-- Support layer-resolved and valley-resolved unfolding references.
-- Build examples around twisted MoS2 and related 2D heterostructures.
+- Detect layers, relative rotations, moire reciprocal lattices, local stacking,
+  local strain, and reference-dependent valley mappings where definitions are
+  provided by symmetry detection or user configuration.
+- Support unfolding to primitive crystal, conventional-cell, reference-layer,
+  substrate, adsorbate, moire mini-zone, local approximate, and user-defined
+  reciprocal references.
+- Support any number of reference structures for twisted multilayers, rotated
+  heterostructures, interfaces, slabs, molecule-on-surface systems, and generic
+  layered crystals.
+
+## General example classes
+
+- Toy 1D chain.
+- Toy 2D square lattice.
+- Toy honeycomb lattice.
+- Generic diagonal and non-diagonal supercells.
+- Generic vacancy, substitutional, antisite, interstitial, charged, and complex
+  defects.
+- Generic disordered alloy and special quasirandom structures.
+- Generic reconstructed surface and adsorbate-on-surface systems.
+- Generic interface and rotated heterostructure systems.
+- Generic magnetic, spinor, charge-density-wave, Peierls-distorted, and
+  Jahn-Teller-distorted supercells.
+- Generic twisted bilayer, twisted multilayer, and moire superlattice systems.
+- Generic Wannier, tight-binding, continuum, and Hamiltonian-matrix models.
+
+## General theory chapters
+
+- Band folding and unfolding in arbitrary crystals.
+- Defect unfolding in arbitrary crystals.
+- Disorder and alloy unfolding.
+- Surface, slab, interface, and adsorbate unfolding.
+- Magnetic, spinor, and spin-texture unfolding.
+- Charge-density-wave, Peierls, Jahn-Teller, and reconstructed-supercell
+  unfolding.
+- Twisted and moire unfolding for layered and quasi-2D systems.
+- Wannier and tight-binding unfolding.
+- Phonon, exciton, electron-phonon, superconducting-gap, Fermi-surface, and
+  ARPES-like extensions.
 
 ## Later milestones
 
