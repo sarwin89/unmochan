@@ -1,0 +1,48 @@
+[build-system]
+requires = ["hatchling>=1.25"]
+build-backend = "hatchling.build"
+
+[project]
+name = "unfoldlab"
+version = "0.1.0"
+description = "Research-grade Python toolkit for band unfolding, effective band structures, and twisted/moire electronic-structure analysis."
+readme = "README.md"
+requires-python = ">=3.10"
+license = "LicenseRef-Proprietary"
+authors = [{ name = "Prajwal Souza" }]
+dependencies = [
+  "numpy>=1.23",
+]
+
+[project.optional-dependencies]
+io = [
+  "ase>=3.22",
+  "h5py>=3.10",
+  "pymatgen>=2024.5",
+]
+plot = [
+  "matplotlib>=3.8",
+  "plotly>=5.20",
+]
+dev = [
+  "pytest>=8.0",
+  "ruff>=0.4",
+  "mypy>=1.10",
+]
+
+[project.scripts]
+unfoldlab = "unfoldlab.cli.main:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["unfoldlab"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
