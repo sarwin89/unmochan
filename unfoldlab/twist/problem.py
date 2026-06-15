@@ -9,6 +9,7 @@ import numpy as np
 from numpy.typing import NDArray
 
 from unfoldlab.core.structures import Structure
+from unfoldlab.io.qe import read_pw_input_structure
 from unfoldlab.io.vasp import read_poscar
 from unfoldlab.twist.geometry import assign_layers_by_axis, in_plane_twist_angle
 
@@ -30,18 +31,54 @@ class TwistedUnfoldingProblem:
         references: dict[str, str | Path | Structure],
         supercell: str | Path | Structure,
         outputs: str | Path | None = None,
+        code: str = "auto",
     ) -> TwistedUnfoldingProblem:
-        """Build from any number of named reference structures."""
+        """Build from named references using VASP, QE, or already-loaded structures."""
 
         if not references:
             raise ValueError("at least one reference structure is required")
         loaded_references = {
-            label: _load_structure(structure) for label, structure in references.items()
+            label: _load_structure(structure, code=code)
+            for label, structure in references.items()
         }
         return cls(
             references=loaded_references,
-            supercell_structure=_load_structure(supercell),
+            supercell_structure=_load_structure(supercell, code=code),
             outputs=Path(outputs) if outputs is not None else None,
+        )
+
+    @classmethod
+    def from_qe(
+        cls,
+        *,
+        references: dict[str, str | Path | Structure],
+        supercell: str | Path | Structure,
+        outputs: str | Path | None = None,
+    ) -> TwistedUnfoldingProblem:
+        """Build a twist problem from QE ``pw.x`` input files or structures."""
+
+        return cls.from_structures(
+            references=references,
+            supercell=supercell,
+            outputs=outputs,
+            code="qe",
+        )
+
+    @classmethod
+    def from_vasp(
+        cls,
+        *,
+        references: dict[str, str | Path | Structure],
+        supercell: str | Path | Structure,
+        outputs: str | Path | None = None,
+    ) -> TwistedUnfoldingProblem:
+        """Build a twist problem from VASP POSCAR/CONTCAR files or structures."""
+
+        return cls.from_structures(
+            references=references,
+            supercell=supercell,
+            outputs=outputs,
+            code="vasp",
         )
 
     def detect_layers(self, *, axis: int = 2, n_layers: int | None = None) -> NDArray[np.int64]:
@@ -109,7 +146,22 @@ class TwistedUnfoldingProblem:
         raise NotImplementedError("moire Brillouin-zone unfolding is not implemented yet")
 
 
-def _load_structure(structure: str | Path | Structure) -> Structure:
+def _load_structure(structure: str | Path | Structure, *, code: str = "auto") -> Structure:
     if isinstance(structure, Structure):
         return structure
-    return read_poscar(structure)
+    code_normalized = code.lower()
+    if code_normalized == "vasp":
+        return read_poscar(structure)
+    if code_normalized == "qe":
+        return read_pw_input_structure(structure)
+    if code_normalized != "auto":
+        raise ValueError("code must be auto, vasp, or qe")
+    try:
+        return read_poscar(structure)
+    except Exception:
+        try:
+            return read_pw_input_structure(structure)
+        except Exception as qe_error:
+            raise ValueError(
+                f"could not read structure {structure!r} as VASP POSCAR or QE pw.x input"
+            ) from qe_error

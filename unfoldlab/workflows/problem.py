@@ -13,6 +13,7 @@ from unfoldlab.core.projections import ProjectionSelector, parse_projection_sele
 from unfoldlab.core.spectral import EffectiveBandStructure
 from unfoldlab.core.structures import Structure
 from unfoldlab.core.transformations import TransformationMatrix, detect_transformation
+from unfoldlab.core.unfolding import BandUnfoldingData
 from unfoldlab.io.vasp import read_eigenval, read_poscar
 
 
@@ -135,17 +136,17 @@ class UnfoldingProblem:
         parsed = read_eigenval(eigenval)
         if parsed.energies.ndim != 2:
             raise ValueError("spin-channel EIGENVAL data must be selected before EBS construction")
-        return EffectiveBandStructure(
+        return BandUnfoldingData(
             kpoints=parsed.kpoints,
             energies=parsed.energies,
             weights=weights,
             reference_energy=reference_energy,
+            source_code=self.code,
             metadata={
                 "source": str(eigenval),
-                "code": self.code,
                 "note": "EIGENVAL energies with caller-provided or unit weights",
             },
-        )
+        ).to_effective_band_structure()
 
 
 def _normalize_projections(

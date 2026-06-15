@@ -35,8 +35,9 @@ of a general method, not a core design assumption.
 
 ## Milestone 4: Rigorous VASP wavefunction backend
 
-- Implement or integrate robust `WAVECAR` reading.
-- Compute plane-wave coefficient unfolding weights.
+- Expand `WAVECAR` validation against real VASP files from multiple versions.
+- Add gamma-only reconstruction when a code-independent reconstruction strategy
+  is available.
 - Compare plane-wave and projection-based approximations.
 
 ## Milestone 5: Generic reference-resolved and moire workflows
@@ -81,8 +82,15 @@ of a general method, not a core design assumption.
 - Phonon, exciton, electron-phonon, superconducting-gap, Fermi-surface, and
   ARPES-like extensions.
 
+## Completed backend foundations
+
+- Packaged Quantum ESPRESSO folded-path generation and plane-wave unfolding
+  from saved wavefunctions, external weight tables, or coefficient tables.
+- VASP `WAVECAR` plane-wave unfolding through the same matching kernel used by QE.
+- Guided CLI mode for menu-driven workflows alongside scriptable subcommands.
+
 ## Later milestones
 
 - Wannier90 and tight-binding backends.
-- Quantum ESPRESSO and generic HDF5 backends.
+- Generic HDF5 backends beyond QE wavefunction layouts.
 - Textbook-level theory documentation and benchmark galleries.

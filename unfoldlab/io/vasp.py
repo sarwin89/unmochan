@@ -9,6 +9,7 @@ import numpy as np
 from numpy.typing import NDArray
 
 from unfoldlab.core.structures import Structure
+from unfoldlab.io.qe import QEPath
 
 
 @dataclass(frozen=True)
@@ -148,6 +149,33 @@ def read_eigenval(path: str | Path) -> EigenvalData:
         occupations=occupations,
         nelect=nelect,
     )
+
+
+def write_vasp_kpoints(path: str | Path, folded_kpoints: NDArray[np.float64]) -> None:
+    """Write an explicit VASP reciprocal-space KPOINTS file."""
+
+    rows = ["UnfoldLab folded supercell path", str(len(folded_kpoints)), "Reciprocal"]
+    for kpoint in np.asarray(folded_kpoints, dtype=float):
+        rows.append(f"{kpoint[0]: .12f} {kpoint[1]: .12f} {kpoint[2]: .12f} 1.0")
+    Path(path).write_text("\n".join(rows) + "\n")
+
+
+def write_vasp_path_files(
+    path_json: str | Path,
+    *,
+    kpoints: str | Path,
+    kmap: str | Path,
+    ticks: str | Path,
+) -> QEPath:
+    """Generate VASP KPOINTS plus the shared kmap/tick files from a path JSON."""
+
+    from unfoldlab.io.qe import build_qe_path, write_kmap, write_ticks
+
+    path_data = build_qe_path(path_json)
+    write_vasp_kpoints(kpoints, path_data.supercell_folded)
+    write_kmap(kmap, path_data)
+    write_ticks(ticks, path_data)
+    return path_data
 
 
 def _all_ints(tokens: list[str]) -> bool:
