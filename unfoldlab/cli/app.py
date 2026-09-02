@@ -16,8 +16,11 @@ from unfoldlab.cli.model import model_app
 from unfoldlab.cli.phonon import phonon_app
 
 app = typer.Typer(
-    name="unfoldlab",
-    help="Band unfolding workflows for plane-wave electronic-structure codes.",
+    name="unmochan",
+    help=(
+        "UNfolding MOmentum-space Crystal Hamiltonian ANalysis for plane-wave "
+        "codes and model Hamiltonians."
+    ),
     invoke_without_command=True,
     no_args_is_help=False,
 )
@@ -48,7 +51,7 @@ def root(
         ),
     ] = False,
 ) -> None:
-    """Run UnfoldLab commands."""
+    """Run Unmochan commands."""
 
     if ctx.invoked_subcommand is None:
         # Imported here: `guided` drives the commands, which register on `app`.
@@ -59,7 +62,7 @@ def root(
 
 @app.command("guide")
 def guide() -> None:
-    """Launch the guided interactive workflow menu."""
+    """Launch the guided Unmochan workflow menu."""
 
     from unfoldlab.cli.guided import run_guided_cli
 

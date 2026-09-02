@@ -3307,3 +3307,39 @@ Local verification after those fixes:
 `mypy`, `python -m build`, and `lake` were not installed in the local
 interpreter/machine used for this integration pass, so those gates were not run
 locally.  They remain configured or documented as release gates.
+
+## 42. Rename to Unmochan
+
+The project identity is now **Unmochan**: UNfolding MOmentum-space Crystal
+Hamiltonian ANalysis.  The distribution metadata, primary console script,
+README, guided-mode title and current documentation use `unmochan` as the
+public entry point.  The Python implementation namespace stays `unfoldlab` for
+backward compatibility, and a thin `unmochan` package re-exports the public API.
+The historical `unfoldlab` executable remains installed as a compatibility
+wrapper with its own program name.
+
+Verification after the rename:
+
+* `F:\miniconda3\python.exe -m pytest --basetemp .tmp-pytest -p
+  no:cacheprovider` passed: 934 tests, 0 failures.
+* `F:\miniconda3\python.exe -m ruff check .` passed.
+* `PYTHONPYCACHEPREFIX=.tmp-pycache F:\miniconda3\python.exe -m compileall
+  unfoldlab unmochan tests` passed.
+* `F:\miniconda3\python.exe -m pip check` passed.
+* `F:\miniconda3\python.exe -m pip install -e .` rebuilt the editable install
+  as `unmochan==0.1.0` and installed both `unmochan.exe` and `unfoldlab.exe`.
+* `F:\miniconda3\Scripts\unmochan.exe --help` and
+  `F:\miniconda3\Scripts\unfoldlab.exe --help` both ran successfully.
+
+The existing benchmark scripts were also run against the renamed code:
+
+* `examples/benchmark_weights.py`: 35,937 G-vectors, 60 bands, 64 fiber
+  k-points; per-k-point 2.729 s, masked batch 0.239 s, class batch 0.041 s,
+  largest disagreement `0.00e+00`.
+* `examples/benchmark_symmetry.py`: brute-force agreement on the 8-site cell;
+  perfect-cell detection from 8 to 216 sites took 0.053 s to 1.977 s, and the
+  rattled 125-site case reduced to one operation in 0.562 s.
+
+`mypy`, `python -m build`, and `lake build` still were not available in the
+active local interpreter/machine.  CI keeps those gates documented/configured
+where the corresponding tools are present.

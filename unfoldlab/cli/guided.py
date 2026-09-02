@@ -41,7 +41,7 @@ def run_guided_cli() -> None:
             "unfolded bands.\n\n"
             "Every answer here maps directly to a scriptable command, so the run can be "
             "repeated later from the shell.",
-            title="UnfoldLab Guided Mode",
+            title="Unmochan Guided Mode",
             border_style="cyan",
         )
     )

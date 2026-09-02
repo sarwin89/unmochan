@@ -1,6 +1,6 @@
-# Testing UnfoldLab
+# Testing Unmochan
 
-UnfoldLab's v1 quality bar is backend parity: VASP and QE inputs that describe
+Unmochan's v1 quality bar is backend parity: VASP and QE inputs that describe
 the same physical plane-wave problem must normalize into the same internal data
 contract and produce the same unfolded weights within numerical tolerance.
 
@@ -11,7 +11,7 @@ Run this before preparing a commit:
 ```bash
 python -m pytest
 python -m ruff check .
-python -m compileall unfoldlab tests
+python -m compileall unfoldlab unmochan tests
 python -m pip check
 ```
 
@@ -80,5 +80,6 @@ For release candidates, build and install the package in a clean environment:
 python -m build
 python -m venv .venv-smoke
 .venv-smoke\Scripts\python -m pip install dist/*.whl
+.venv-smoke\Scripts\unmochan --help
 .venv-smoke\Scripts\unfoldlab --help
 ```

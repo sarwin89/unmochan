@@ -35,10 +35,10 @@ workflow can be checked end to end in a second:
   supercells.
 
 ```bash
-unfoldlab model unfold --model examples/toy_1d_chain.json \
+unmochan model unfold --model examples/toy_1d_chain.json \
     --matrix "3 0 0 0 1 0 0 0 1" --kpoint 0.05,0,0
 
-unfoldlab model unfold --model examples/toy_2d_square.json \
+unmochan model unfold --model examples/toy_2d_square.json \
     --matrix "2 1 0 -1 1 0 0 0 1" --kpoint 0.11,0.23,0 --json ebs.json
 ```
 
@@ -55,11 +55,11 @@ the question a plot asks, which is how much weight each *primitive* k-point of a
 band path carries:
 
 ```bash
-unfoldlab model bands --model examples/toy_1d_chain.json \
+unmochan model bands --model examples/toy_1d_chain.json \
     --matrix "3 0 0 0 1 0 0 0 1" --path 0,0,0:0.5,0,0 --points 51 \
     --json chain_ebs.json
 
-unfoldlab model bands --model examples/toy_1d_chain.json \
+unmochan model bands --model examples/toy_1d_chain.json \
     --matrix "3 0 0 0 1 0 0 0 1" --path 0,0,0:0.5,0,0 --points 51 \
     --onsite 1,0,1.5 --json defect_ebs.json
 ```
@@ -76,7 +76,7 @@ Any `seedname_hr.dat` written by Wannier90 can be used in place of the JSON
 model; the Wigner-Seitz degeneracies are divided out on the way in:
 
 ```bash
-unfoldlab model bands --model wannier/silicon_hr.dat --format hr \
+unmochan model bands --model wannier/silicon_hr.dat --format hr \
     --matrix "2 0 0 0 2 0 0 0 2" --path 0,0,0:0.5,0,0.5 --points 101
 ```
 

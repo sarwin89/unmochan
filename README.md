@@ -1,11 +1,12 @@
-# UnfoldLab
+# Unmochan
 
-A material-agnostic Python toolkit for **band unfolding**, spectral analysis and
+**UNfolding MOmentum-space Crystal Hamiltonian ANalysis**: a
+material-agnostic Python toolkit for **band unfolding**, spectral analysis and
 supercell interpretation, together with a machine-checked formal model of the
 mathematics it implements.
 
 Given a supercell calculation and the integer transformation `T` relating the
-supercell to a primitive reference cell, UnfoldLab reconstructs the *effective
+supercell to a primitive reference cell, Unmochan reconstructs the *effective
 band structure* in the primitive Brillouin zone: for every supercell eigenstate
 it computes how much of its weight belongs to each primitive k-point of the
 fiber, and turns those weights into fat bands, spectral functions, densities of
@@ -15,11 +16,12 @@ states, Fermi levels, spin textures and effective masses.
 
 | Path | Contents |
 | --- | --- |
+| `unmochan/` | public compatibility alias for new imports and `python -m unmochan.cli.main` |
 | `unfoldlab/core/` | the unfolding kernels: folding maps, plane-wave matching, weights and sum rules, spectral broadening, DOS, Fermi level, projections, tight binding, LCAO, phonons, symmetry, disorder ensembles |
 | `unfoldlab/io/` | readers and writers: VASP `WAVECAR` / `PROCAR` / `EIGENVAL`, Quantum ESPRESSO `.dat`, HDF5 and XML, Wannier90 `_hr.dat` / `_tb.dat`, JSON/HDF5 serialization, plotting |
 | `unfoldlab/twist/` | commensurate twist angles, moiré cells and stack diagnostics |
 | `unfoldlab/workflows/` | end-to-end problem definitions and backend drivers |
-| `unfoldlab/cli/` | the `unfoldlab` command line, scriptable and guided |
+| `unfoldlab/cli/` | implementation namespace for the `unmochan` command line; `unfoldlab` remains a legacy command alias |
 | `lean-proofs/RequestProject/` | optional local Lean 4 + Mathlib proof bundle, kept untracked |
 | `tests/` | the test suite, including synthetic VASP/QE fixtures |
 | `docs/` | review log, formal-model map, roadmap, benchmarks, progress tracker |
@@ -38,10 +40,10 @@ dependency-free SVG fallback, so the core workflows run on `numpy` alone.
 ## A one-second example
 
 ```bash
-unfoldlab model unfold --model examples/toy_1d_chain.json \
+unmochan model unfold --model examples/toy_1d_chain.json \
     --matrix "3 0 0 0 1 0 0 0 1" --kpoint 0.05,0,0
 
-unfoldlab model bands --model examples/toy_1d_chain_defect.json \
+unmochan model bands --model examples/toy_1d_chain_defect.json \
     --matrix "3 0 0 0 1 0 0 0 1" --path 0,0,0:0.5,0,0 --points 51 \
     --json chain_ebs.json
 ```
@@ -73,7 +75,7 @@ governs.
 ```bash
 python -m pytest -q          # test suite
 ruff check .                 # lint
-mypy unfoldlab               # types
+mypy unfoldlab unmochan      # types
 cd lean-proofs && lake build # optional local formal model, if present
 ```
 

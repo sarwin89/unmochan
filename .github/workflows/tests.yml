@@ -38,10 +38,10 @@ jobs:
         run: python -m ruff check .
 
       - name: Mypy
-        run: python -m mypy unfoldlab
+        run: python -m mypy unfoldlab unmochan
 
       - name: Compile
-        run: python -m compileall unfoldlab tests
+        run: python -m compileall unfoldlab unmochan tests
 
       - name: Dependency check
         run: python -m pip check
@@ -66,6 +66,7 @@ jobs:
           python -m venv .venv-smoke
           . .venv-smoke/bin/activate
           python -m pip install dist/*.whl
+          unmochan --help
           unfoldlab --help
 
   real-io:

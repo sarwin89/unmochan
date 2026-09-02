@@ -1,4 +1,4 @@
-# UnfoldLab Roadmap
+# Unmochan Roadmap
 
 This roadmap condenses the project goal document into implementable milestones.
 The project is material-agnostic: any material-specific tutorial is an instance
@@ -41,7 +41,7 @@ of a general method, not a core design assumption.
   basis, both VASP half-space conventions).
 - Unfolding from symmetry-reduced wavefunction sets: done for VASP and QE.
   Point-group operations can be supplied by the user or detected with
-  `unfoldlab detect-symmetry`.
+  `unmochan detect-symmetry`.
 - Spin-resolved unfolding: component-resolved weights and the full spin texture
   of a noncollinear WAVECAR are done; the texture is deliberately unavailable
   in symmetry-reduced mode, because the spin rotates with the operation.
@@ -96,9 +96,9 @@ of a general method, not a core design assumption.
   `lean-proofs/RequestProject/Unfolding/TightBinding.lean`.  Models are read either from a
   small JSON format or from a Wannier90 `seedname_hr.dat` or `seedname_tb.dat`,
   and unfolded either over the fiber of a supercell k-point
-  (`unfoldlab model unfold`) or along a path in the primitive Brillouin zone
-  (`unfoldlab model bands`).  Orbital-projected fat bands
-  (`unfoldlab model bands --group ...`) say which orbital, sublattice or layer
+  (`unmochan model unfold`) or along a path in the primitive Brillouin zone
+  (`unmochan model bands`).  Orbital-projected fat bands
+  (`unmochan model bands --group ...`) say which orbital, sublattice or layer
   carries the unfolded weight, with additivity and the projected fiber sum rule
   proved alongside the plain sum rules.
 - Packaged Quantum ESPRESSO folded-path generation and plane-wave unfolding

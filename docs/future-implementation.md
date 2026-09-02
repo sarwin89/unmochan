@@ -4,7 +4,8 @@
 
 - Keep `make-kpoints`, `weights`, and `unfold` as the primary backend-neutral
   workflow.
-- Preserve `unfoldlab vasp ...` and `unfoldlab qe ...` as compatibility aliases.
+- Document `unmochan` as the primary executable and preserve `unfoldlab vasp ...`
+  and `unfoldlab qe ...` as compatibility aliases.
 - Add neutral names such as `UnfoldingPath` and `KPointMap` for shared path
   models while keeping QE-prefixed aliases working.
 - Keep guided mode focused on DFT workflow steps, not theory pages.

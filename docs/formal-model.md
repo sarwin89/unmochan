@@ -355,7 +355,7 @@ unfolding weight is the squared norm of its discrete Fourier component,
 different theorem from the plane-wave one — it is discrete Fourier duality
 between the cell classes `ℤ³ / ℤ³ @ T` inside the supercell and the reciprocal
 classes `ℤ³ / T·ℤ³` that label the fiber.  `unfoldlab.core.tight_binding`
-implements it and `unfoldlab model unfold` exposes it on the command line.
+implements it and `unmochan model unfold` exposes it on the command line.
 
 | Lean | Python | statement |
 | --- | --- | --- |
@@ -369,7 +369,7 @@ implements it and `unfoldlab model unfold` exposes it on the command line.
 | `tbWeight_nonneg`, `tbWeight_le_one` | `tight_binding_weights` | the weights are probabilities |
 | `tbAmplitude_congr_left` | `tight_binding_weights` | the weights do not depend on how the primitive k-points are wrapped |
 | `tbWeight_orbital_phase` | `tight_binding_weights` | a per-orbital phase — i.e. the convention for where a Wannier function sits inside the cell — leaves every weight unchanged |
-| `blochState`, `tbWeight_blochState` | `unfold_tight_binding_path`, `unfoldlab model bands` | **band folding undone**: a supercell state that is a primitive Bloch state unfolds to weight exactly one at its own fiber member and exactly zero at all the others |
+| `blochState`, `tbWeight_blochState` | `unfold_tight_binding_path`, `unmochan model bands` | **band folding undone**: a supercell state that is a primitive Bloch state unfolds to weight exactly one at its own fiber member and exactly zero at all the others |
 | `tbOrbitalWeight` | `tight_binding_orbital_weights` | the fat-band weight: the unfolding weight restricted to a group of primitive-cell orbitals, normalized by the *full* state norm |
 | `tbOrbitalWeight_union_of_disjoint` | `unfold_tight_binding_path_projected` | disjoint orbital groups add, so a partition of the orbitals reproduces the total weight |
 | `tbOrbitalWeight_le_tbWeight`, `tbOrbitalWeight_mono`, `tbOrbitalWeight_nonneg` | `tight_binding_orbital_weights` | a group weight lies between zero and the total, and grows with the group |

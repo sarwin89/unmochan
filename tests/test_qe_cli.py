@@ -26,7 +26,7 @@ def test_no_args_launches_guided_menu_and_exits_cleanly():
     result = runner.invoke(app, [], input="vasp\n0\n")
 
     assert result.exit_code == 0, result.output
-    assert "UnfoldLab Guided Mode" in result.output
+    assert "Unmochan Guided Mode" in result.output
     assert "Leaving guided mode." in result.output
 
 

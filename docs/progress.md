@@ -1,4 +1,4 @@
-# UnfoldLab progress tracker
+# Unmochan progress tracker
 
 A living record of *where the project stands* and *what is being worked on*, so
 that work is not repeated and the next pass can start from a known state.
@@ -12,17 +12,32 @@ that work is not repeated and the next pass can start from a known state.
 
 ## Repository state
 
-Last updated: local integration pass, 2026-09-02.
+Last updated: Unmochan rename pass, 2026-09-02.
 
 | Gate | Command | State |
 | --- | --- | --- |
-| Python tests | `F:\miniconda3\python.exe -m pytest --basetemp .tmp-pytest -p no:cacheprovider` | 931 passed, 0 failed |
+| Python tests | `F:\miniconda3\python.exe -m pytest --basetemp .tmp-pytest -p no:cacheprovider` | 934 passed, 0 failed |
 | Lint | `F:\miniconda3\python.exe -m ruff check .` | clean |
-| Compile | `PYTHONPYCACHEPREFIX=.tmp-pycache F:\miniconda3\python.exe -m compileall unfoldlab tests` | clean |
+| Compile | `PYTHONPYCACHEPREFIX=.tmp-pycache F:\miniconda3\python.exe -m compileall unfoldlab unmochan tests` | clean |
 | Dependencies | `F:\miniconda3\python.exe -m pip check` | clean |
 | Formal model | `lake build` | not run locally; `lake` was not installed |
-| Types | `mypy unfoldlab` | not run locally; `mypy` was not installed in the active interpreter |
+| Types | `mypy unfoldlab unmochan` | not run locally; `mypy` was not installed in the active interpreter |
 | Coverage | `python -m pytest -q --cov=unfoldlab` | not run locally in this integration pass |
+
+The rename pass made `unmochan` the primary package distribution and console
+script while preserving `unfoldlab` imports and the legacy executable.  Local
+editable install regenerated both scripts; `unmochan --help` and
+`unfoldlab --help` both start cleanly, with `unmochan` as the primary usage
+name and `unfoldlab` as the compatibility program name.
+
+Existing performance checks after the rename:
+
+* `examples/benchmark_weights.py`: 35,937 G-vectors, 60 bands, 64 fiber
+  k-points; per-k-point 2.729 s, masked batch 0.239 s, class batch 0.041 s,
+  largest disagreement `0.00e+00`.
+* `examples/benchmark_symmetry.py`: brute-force agreement on the 8-site cell;
+  perfect-cell detection from 8 to 216 sites took 0.053 s to 1.977 s, and the
+  rattled 125-site case reduced to one operation in 0.562 s.
 
 The local integration pass imported the `output-final_aristotle` tree into this
 repository, excluding generated caches and coverage artifacts.  Two local

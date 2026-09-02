@@ -3,9 +3,9 @@ requires = ["hatchling>=1.25"]
 build-backend = "hatchling.build"
 
 [project]
-name = "unfoldlab"
+name = "unmochan"
 version = "0.1.0"
-description = "Material-agnostic Python toolkit for band unfolding, spectral analysis, and supercell interpretation."
+description = "UNfolding MOmentum-space Crystal Hamiltonian ANalysis for VASP, Quantum ESPRESSO, and model Hamiltonians."
 readme = "README.md"
 requires-python = ">=3.10"
 license = "LicenseRef-Proprietary"
@@ -35,10 +35,11 @@ dev = [
 ]
 
 [project.scripts]
-unfoldlab = "unfoldlab.cli.main:main"
+unmochan = "unfoldlab.cli.main:main"
+unfoldlab = "unfoldlab.cli.main:unfoldlab_main"
 
 [tool.hatch.build.targets.wheel]
-packages = ["unfoldlab"]
+packages = ["unfoldlab", "unmochan"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
