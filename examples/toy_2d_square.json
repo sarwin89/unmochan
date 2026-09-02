@@ -1,0 +1,9 @@
+{
+  "comment": "Anisotropic square lattice, one orbital per cell. Try a non-diagonal supercell such as --matrix \"2 1 0 -1 1 0 0 0 1\".",
+  "n_orbitals": 1,
+  "hoppings": [
+    {"cell": [0, 0, 0], "matrix": [[0.3]]},
+    {"cell": [1, 0, 0], "matrix": [[-1.0]]},
+    {"cell": [0, 1, 0], "matrix": [[-0.7]]}
+  ]
+}

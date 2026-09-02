@@ -1,6 +1,10 @@
 import numpy as np
+import pytest
+from synthetic_wavecar import write_synthetic_wavecar
 
+from unfoldlab.core.kpoints import KPoint
 from unfoldlab.core.structures import Structure
+from unfoldlab.io.vasp_wfc import generate_vasp_g_vectors
 from unfoldlab.twist import TwistedUnfoldingProblem, assign_layers_by_axis
 
 
@@ -95,9 +99,7 @@ def test_twisted_problem_loads_qe_alat_units(tmp_path):
         ]
     )
     reference.write_text(qe_text)
-    supercell.write_text(
-        qe_text.replace("A 0 0 0.25", "A 0 0 0.25\nB 0 0 1.50")
-    )
+    supercell.write_text(qe_text.replace("A 0 0 0.25", "A 0 0 0.25\nB 0 0 1.50"))
 
     problem = TwistedUnfoldingProblem.from_structures(
         references={"layer": reference},
@@ -106,3 +108,88 @@ def test_twisted_problem_loads_qe_alat_units(tmp_path):
     )
 
     assert problem.supercell_structure.n_sites == 2
+
+
+def test_moire_lattice_inverts_only_the_in_plane_block():
+    """B_a - B_b is singular for a layered stack; the in-plane block is not."""
+
+    bottom = Structure(np.diag([1.0, 1.0, 10.0]), ("A",), [[0, 0, 0]])
+    top = Structure(np.diag([0.5, 0.5, 10.0]), ("B",), [[0, 0, 0]])
+    supercell = Structure(np.diag([1.0, 1.0, 10.0]), ("A", "B"), [[0, 0, 0.2], [0, 0, 0.8]])
+    problem = TwistedUnfoldingProblem.from_structures(
+        references={"bottom": bottom, "top": top},
+        supercell=supercell,
+    )
+
+    difference = problem.build_moire_reciprocal_lattice()
+    assert abs(float(np.linalg.det(difference))) < 1e-12
+
+    moire = problem.moire_lattice()
+    # Commensurate 1x1 and 0.5x0.5 layers repeat with the period of the larger
+    # cell, and the stacking vector is inherited from the supercell.
+    assert np.allclose(np.abs(np.diag(moire)), [1.0, 1.0, 10.0])
+    assert np.allclose(moire[2], supercell.lattice[2])
+
+
+def test_moire_lattice_rejects_identical_references():
+    reference = Structure(np.diag([1.0, 1.0, 10.0]), ("A",), [[0, 0, 0]])
+    supercell = Structure(np.diag([1.0, 1.0, 10.0]), ("A", "A"), [[0, 0, 0.2], [0, 0, 0.8]])
+    problem = TwistedUnfoldingProblem.from_structures(
+        references={"bottom": reference, "top": reference},
+        supercell=supercell,
+    )
+
+    with pytest.raises(ValueError, match="no moire cell"):
+        problem.moire_lattice()
+
+
+def test_unfold_to_reference_uses_that_references_transform(tmp_path):
+    lattice = np.diag([2.0, 1.0, 1.0])
+    encut = 200.0
+    g_vectors = generate_vasp_g_vectors(lattice, np.zeros(3), encut)
+    rng = np.random.default_rng(5)
+    values = (rng.normal(size=len(g_vectors)) + 1j * rng.normal(size=len(g_vectors))).astype(
+        np.complex64
+    )
+    wavecar = tmp_path / "WAVECAR"
+    write_synthetic_wavecar(
+        wavecar,
+        lattice=lattice,
+        encut=encut,
+        rtag=45200,
+        kpoints=np.zeros((1, 3)),
+        energies=np.array([[-0.5]]),
+        occupations=np.array([[1.0]]),
+        coefficients=values.reshape(1, 1, 1, len(g_vectors)),
+    )
+
+    problem = TwistedUnfoldingProblem.from_structures(
+        references={"layer": Structure(np.eye(3), ("A",), [[0, 0, 0]])},
+        supercell=Structure(lattice, ("A", "A"), [[0, 0, 0], [0.5, 0, 0]]),
+        outputs=tmp_path,
+    )
+    ebs = problem.unfold_to_reference(
+        "layer",
+        kpath=[KPoint([0.0, 0.0, 0.0]), KPoint([0.5, 0.0, 0.0])],
+        operations=np.zeros((0, 3, 3), dtype=int),
+    )
+
+    assert ebs.metadata["reference"] == "layer"
+    assert ebs.metadata["transformation"]["multiplicity"] == 2
+    assert np.allclose(ebs.energies, -0.5)
+    assert ebs.weights[:, 0].sum() == pytest.approx(1.0)
+
+
+def test_unfold_to_reference_rejects_an_incommensurate_reference(tmp_path):
+    problem = TwistedUnfoldingProblem.from_structures(
+        references={"layer": Structure(np.diag([0.7, 1.0, 1.0]), ("A",), [[0, 0, 0]])},
+        supercell=Structure(np.diag([2.0, 1.0, 1.0]), ("A",), [[0, 0, 0]]),
+        outputs=tmp_path,
+    )
+
+    with pytest.raises(ValueError, match="integer transformation"):
+        problem.unfold_to_reference(
+            "layer",
+            kpath=[KPoint([0.0, 0.0, 0.0])],
+            wavecar=tmp_path / "missing",
+        )

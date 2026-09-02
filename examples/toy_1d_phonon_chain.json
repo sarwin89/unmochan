@@ -1,0 +1,9 @@
+{
+  "comment": "Monatomic spring chain along x: omega(k) = 2 sqrt(k/m) |sin(pi k_x)|.",
+  "masses": [2.0],
+  "force_constants": [
+    {"cell": [0, 0, 0], "matrix": [[2.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0]]},
+    {"cell": [1, 0, 0], "matrix": [[-1.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0]]}
+  ],
+  "symmetrize": true
+}

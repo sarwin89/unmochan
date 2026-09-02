@@ -112,11 +112,7 @@ def test_qe_weights_cli_from_coefficients(tmp_path: Path):
     coeffs = tmp_path / "coefficients.dat"
     out = tmp_path / "weights.dat"
     coeffs.write_text(
-        "# ik ib G1 G2 G3 Re Im\n"
-        "1 1 0 0 0 1 0\n"
-        "1 1 1 0 0 1 0\n"
-        "2 1 0 0 0 1 0\n"
-        "2 1 1 0 0 1 0\n"
+        "# ik ib G1 G2 G3 Re Im\n1 1 0 0 0 1 0\n1 1 1 0 0 1 0\n2 1 0 0 0 1 0\n2 1 1 0 0 1 0\n"
     )
 
     result = runner.invoke(
@@ -213,3 +209,36 @@ def _write_kmap(tmp_path: Path) -> Path:
     )
     assert result.exit_code == 0, result.output
     return kmap
+
+
+def test_qe_info_reports_the_save_metadata(tmp_path: Path):
+    import numpy as np
+
+    from tests.synthetic_qe_xml import write_data_file_schema
+
+    save = tmp_path / "pwscf.save"
+    write_data_file_schema(
+        save / "data-file-schema.xml",
+        lattice_bohr=np.diag([4.0, 4.0, 8.0]),
+        alat_bohr=4.0,
+        kpoints_cart_alat=np.array([[0.0, 0.0, 0.0], [0.5, 0.0, 0.0]]),
+        eigenvalues_hartree=np.zeros((2, 3)),
+        paw=True,
+    )
+
+    result = runner.invoke(app, ["qe-info", "--save", str(tmp_path), "--kpoints"])
+
+    assert result.exit_code == 0, result.output
+    output = " ".join(result.output.split())
+    assert "alat: 4.00000000 bohr" in output
+    assert "k-points: 2" in output
+    assert "Bands: 3" in output
+    assert "PAW" in output
+    assert "--lattice-alat" in output
+
+
+def test_qe_info_rejects_a_directory_without_a_save(tmp_path: Path, capsys):
+    exit_code = main(["qe-info", "--save", str(tmp_path)])
+
+    assert exit_code == 2
+    assert "no QE XML" in capsys.readouterr().out

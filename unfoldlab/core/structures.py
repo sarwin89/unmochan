@@ -48,7 +48,7 @@ class Structure:
     def reciprocal_lattice(self) -> NDArray[np.float64]:
         """Return reciprocal lattice rows with the 2*pi convention."""
 
-        return 2.0 * np.pi * np.linalg.inv(self.lattice).T
+        return np.asarray(2.0 * np.pi * np.linalg.inv(self.lattice).T, dtype=np.float64)
 
     @property
     def cart_coords(self) -> NDArray[np.float64]:

@@ -1,8 +1,13 @@
-"""Quantum ESPRESSO text I/O and effective-band helpers."""
+"""Quantum ESPRESSO text I/O and effective-band helpers.
+
+The band scatter plot used to live here, which was the wrong home for it: it is
+backend-neutral and the VASP workflow imported it out of the QE reader.  It is
+now :mod:`unfoldlab.io.plot_bands`, re-exported below so that the old import
+path keeps working.
+"""
 
 from __future__ import annotations
 
-import html
 import json
 import re
 from dataclasses import dataclass
@@ -13,11 +18,14 @@ import numpy as np
 from numpy.typing import NDArray
 
 from unfoldlab.core.kpoints import interpolate_segment
-from unfoldlab.core.numerics import wrap_fractional
+from unfoldlab.core.numerics import TransformLike, as_matrix3, wrap_fractional
 from unfoldlab.core.plane_waves import compute_weights_from_coefficient_table
 from unfoldlab.core.spectral import EffectiveBandStructure
 from unfoldlab.core.structures import Structure
 from unfoldlab.core.unfolding import BandUnfoldingData
+from unfoldlab.io.plot_bands import color_from_weight as color_from_weight
+from unfoldlab.io.plot_bands import plot_unfolded as plot_unfolded
+from unfoldlab.io.plot_bands import plot_unfolded_svg as plot_unfolded_svg
 
 BOHR_TO_ANGSTROM = 0.529177210903
 
@@ -58,7 +66,16 @@ class QEKMap:
         return int(self.primitive_kpoints.shape[0])
 
 
-def read_path_json(path: str | Path) -> tuple[NDArray[np.int64], list[PathNode]]:
+def read_path_json(
+    path: str | Path,
+) -> tuple[NDArray[np.int64], list[PathNode], NDArray[np.float64] | None]:
+    """Read a path definition.
+
+    An optional ``"primitive_lattice"`` entry (3x3 real-space lattice rows, in
+    angstrom) makes the path coordinate a true reciprocal-space distance; see
+    :func:`interpolate_path`.
+    """
+
     data = json.loads(Path(path).read_text())
     matrix = np.asarray(data["transformation_matrix"], dtype=float)
     if matrix.shape != (3, 3):
@@ -83,7 +100,13 @@ def read_path_json(path: str | Path) -> tuple[NDArray[np.int64], list[PathNode]]
                 n_to_next=int(item.get("n", n_default)),
             )
         )
-    return rounded, nodes
+
+    primitive_lattice = data.get("primitive_lattice")
+    lattice_arr: NDArray[np.float64] | None = None
+    if primitive_lattice is not None:
+        lattice_arr = as_matrix3(primitive_lattice, name="primitive_lattice")
+
+    return rounded, nodes, lattice_arr
 
 
 def read_pw_input_structure(path: str | Path) -> Structure:
@@ -96,14 +119,11 @@ def read_pw_input_structure(path: str | Path) -> Structure:
     cell_index = _find_qe_card(lines, "CELL_PARAMETERS")
     positions_index = _find_qe_card(lines, "ATOMIC_POSITIONS")
     if cell_index is None or positions_index is None:
-        raise ValueError(
-            f"{path} must contain CELL_PARAMETERS and ATOMIC_POSITIONS cards"
-        )
+        raise ValueError(f"{path} must contain CELL_PARAMETERS and ATOMIC_POSITIONS cards")
 
     cell_unit = _qe_card_unit(lines[cell_index], default="angstrom")
     lattice_rows = [
-        [float(value) for value in lines[cell_index + offset].split()[:3]]
-        for offset in range(1, 4)
+        [float(value) for value in lines[cell_index + offset].split()[:3]] for offset in range(1, 4)
     ]
     lattice = np.array(lattice_rows, dtype=float)
     lattice *= _qe_length_scale(cell_unit, lines)
@@ -139,9 +159,32 @@ def read_pw_input_structure(path: str | Path) -> Structure:
     )
 
 
-def interpolate_path(nodes: list[PathNode], transform: NDArray[np.integer]) -> QEPath:
+def interpolate_path(
+    nodes: list[PathNode],
+    transform: NDArray[np.integer],
+    *,
+    primitive_lattice: NDArray[np.float64] | None = None,
+) -> QEPath:
+    """Interpolate a primitive-cell k-path and accumulate its path coordinate.
+
+    When ``primitive_lattice`` is given, consecutive k-points are separated by
+    the Cartesian reciprocal-space distance ``|Δk_frac @ B|`` with
+    ``B = 2π inv(A).T``, which is the physically meaningful abscissa of a band
+    plot.  Without it the fractional-coordinate norm is used, which distorts the
+    relative length of path segments for every cell whose reciprocal lattice is
+    not cubic — pass the lattice whenever band velocities are to be read off the
+    plot.
+    """
+
     if len(nodes) < 2:
         raise ValueError("at least two path nodes are required")
+
+    metric: NDArray[np.float64] | None = None
+    if primitive_lattice is not None:
+        metric = np.asarray(
+            2.0 * np.pi * np.linalg.inv(as_matrix3(primitive_lattice, name="lattice")).T,
+            dtype=np.float64,
+        )
 
     kpoints: list[NDArray[np.float64]] = []
     labels: list[str] = []
@@ -160,7 +203,10 @@ def interpolate_path(nodes: list[PathNode], transform: NDArray[np.integer]) -> Q
             segment = segment[1:]
         for point in segment:
             if kpoints:
-                cumulative += float(np.linalg.norm(point.fractional - kpoints[-1]))
+                delta = point.fractional - kpoints[-1]
+                if metric is not None:
+                    delta = delta @ metric
+                cumulative += float(np.linalg.norm(delta))
             kpoints.append(point.fractional)
             labels.append(point.label or "")
             distances.append(cumulative)
@@ -173,9 +219,17 @@ def interpolate_path(nodes: list[PathNode], transform: NDArray[np.integer]) -> Q
     )
 
 
-def build_qe_path(path_json: str | Path) -> QEPath:
-    matrix, nodes = read_path_json(path_json)
-    return interpolate_path(nodes, matrix)
+def build_qe_path(
+    path_json: str | Path,
+    *,
+    primitive_lattice: NDArray[np.float64] | None = None,
+) -> QEPath:
+    matrix, nodes, json_lattice = read_path_json(path_json)
+    return interpolate_path(
+        nodes,
+        matrix,
+        primitive_lattice=primitive_lattice if primitive_lattice is not None else json_lattice,
+    )
 
 
 def _strip_qe_comment(line: str) -> str:
@@ -205,9 +259,7 @@ def _qe_length_scale(unit: str, lines: list[str]) -> float:
         return BOHR_TO_ANGSTROM
     if unit_lower == "alat":
         return _qe_alat_angstrom(lines)
-    raise ValueError(
-        f"unsupported QE CELL_PARAMETERS unit {unit!r}; use angstrom or bohr"
-    )
+    raise ValueError(f"unsupported QE CELL_PARAMETERS unit {unit!r}; use angstrom or bohr")
 
 
 def _qe_alat_angstrom(lines: list[str]) -> float:
@@ -218,10 +270,7 @@ def _qe_alat_angstrom(lines: list[str]) -> float:
         re.IGNORECASE,
     )
     if celldm_match is not None:
-        return (
-            float(celldm_match.group(1).replace("D", "E").replace("d", "e"))
-            * BOHR_TO_ANGSTROM
-        )
+        return float(celldm_match.group(1).replace("D", "E").replace("d", "e")) * BOHR_TO_ANGSTROM
     a_match = re.search(r"\bA\s*=\s*([0-9.eEdD+-]+)", text)
     if a_match is not None:
         return float(a_match.group(1).replace("D", "E").replace("d", "e"))
@@ -230,23 +279,28 @@ def _qe_alat_angstrom(lines: list[str]) -> float:
 
 def _looks_like_qe_card_or_namelist(line: str) -> bool:
     upper = line.upper()
-    return line.startswith("&") or upper in {
-        "K_POINTS",
-        "CELL_PARAMETERS",
-        "ATOMIC_SPECIES",
-        "ATOMIC_POSITIONS",
-        "CONSTRAINTS",
-        "OCCUPATIONS",
-        "ATOMIC_FORCES",
-    } or upper.startswith(
-        (
-            "K_POINTS ",
-            "CELL_PARAMETERS ",
-            "ATOMIC_SPECIES ",
-            "ATOMIC_POSITIONS ",
-            "CONSTRAINTS ",
-            "OCCUPATIONS ",
-            "ATOMIC_FORCES ",
+    return (
+        line.startswith("&")
+        or upper
+        in {
+            "K_POINTS",
+            "CELL_PARAMETERS",
+            "ATOMIC_SPECIES",
+            "ATOMIC_POSITIONS",
+            "CONSTRAINTS",
+            "OCCUPATIONS",
+            "ATOMIC_FORCES",
+        }
+        or upper.startswith(
+            (
+                "K_POINTS ",
+                "CELL_PARAMETERS ",
+                "ATOMIC_SPECIES ",
+                "ATOMIC_POSITIONS ",
+                "CONSTRAINTS ",
+                "OCCUPATIONS ",
+                "ATOMIC_FORCES ",
+            )
         )
     )
 
@@ -291,22 +345,68 @@ def write_kmap(path: str | Path, qe_path: QEPath) -> None:
     Path(path).write_text("\n".join(rows) + "\n")
 
 
+#: Columns of a k-map row, in order.
+KMAP_COLUMNS = "ik s_pc k_pc(3) K_sc_unfolded(3) K_sc_folded(3) [label]"
+_KMAP_MIN_FIELDS = 11
+
+
 def read_kmap(path: str | Path) -> QEKMap:
+    """Read a k-map table written by :func:`write_kmap`.
+
+    Rows are tab-separated; a whitespace-separated file is accepted as well,
+    since that is what a hand-written k-map usually looks like.  A row with the
+    wrong number of fields, or a field that is not a number, is reported with
+    its line number instead of surfacing as an ``IndexError`` or a bare
+    ``ValueError`` from ``float`` -- these files are typically written by hand
+    or by a user's script.
+    """
+
     rows: list[list[str]] = []
-    for raw in Path(path).read_text().splitlines():
+    line_numbers: list[int] = []
+    for number, raw in enumerate(Path(path).read_text().splitlines(), start=1):
         if not raw.strip() or raw.startswith("ik"):
             continue
-        rows.append(raw.split("\t"))
+        fields = raw.split("\t")
+        if len(fields) < _KMAP_MIN_FIELDS:
+            # A hand-written k-map is usually space-separated.  A label may not
+            # contain whitespace in that case, which is why the tab form is
+            # tried first.
+            fields = raw.split()
+        if len(fields) < _KMAP_MIN_FIELDS:
+            raise ValueError(
+                f"{path}, line {number}: a k-map row needs at least "
+                f"{_KMAP_MIN_FIELDS} fields ({KMAP_COLUMNS}), got {len(fields)}"
+            )
+        rows.append(fields)
+        line_numbers.append(number)
     if not rows:
         raise ValueError(f"no k-point rows found in {path}")
+
+    def _floats(row: list[str], number: int, start: int, stop: int) -> list[float]:
+        try:
+            return [float(value) for value in row[start:stop]]
+        except ValueError as error:
+            raise ValueError(
+                f"{path}, line {number}: k-map fields {start + 1}..{stop} must be "
+                f"numbers ({KMAP_COLUMNS}), got {row[start:stop]}"
+            ) from error
+
     return QEKMap(
-        distances=np.array([float(row[1]) for row in rows], dtype=float),
-        primitive_kpoints=np.array([[float(x) for x in row[2:5]] for row in rows], dtype=float),
+        distances=np.array(
+            [_floats(row, number, 1, 2)[0] for row, number in zip(rows, line_numbers, strict=True)],
+            dtype=float,
+        ),
+        primitive_kpoints=np.array(
+            [_floats(row, number, 2, 5) for row, number in zip(rows, line_numbers, strict=True)],
+            dtype=float,
+        ),
         supercell_unfolded_kpoints=np.array(
-            [[float(x) for x in row[5:8]] for row in rows], dtype=float
+            [_floats(row, number, 5, 8) for row, number in zip(rows, line_numbers, strict=True)],
+            dtype=float,
         ),
         supercell_folded_kpoints=np.array(
-            [[float(x) for x in row[8:11]] for row in rows], dtype=float
+            [_floats(row, number, 8, 11) for row, number in zip(rows, line_numbers, strict=True)],
+            dtype=float,
         ),
         labels=tuple(row[11] if len(row) > 11 else "" for row in rows),
     )
@@ -322,12 +422,10 @@ def write_ticks(path: str | Path, qe_path: QEPath) -> None:
 
 def read_ticks(path: str | Path | None, kmap: QEKMap) -> tuple[list[float], list[str]]:
     if path is None:
-        ticks = [
-            (float(s), label)
-            for s, label in zip(kmap.distances, kmap.labels, strict=True)
-            if label
+        pairs = [
+            (float(s), label) for s, label in zip(kmap.distances, kmap.labels, strict=True) if label
         ]
-        return [x for x, _ in ticks], [label for _, label in ticks]
+        return [x for x, _ in pairs], [label for _, label in pairs]
     ticks: list[float] = []
     labels: list[str] = []
     for raw in Path(path).read_text().splitlines():
@@ -409,6 +507,53 @@ def write_weight_table(path: str | Path, weights: NDArray[np.float64]) -> None:
     Path(path).write_text("\n".join(rows) + "\n")
 
 
+def write_spin_texture_table(path: str | Path, textures: NDArray[np.float64]) -> None:
+    """Write an unfolded spin texture as rows ``ik band Sx Sy Sz |S|``.
+
+    Backend-neutral, like :func:`write_weight_table`: the table is indexed by
+    the k-map row and the band, and the length ``|S|`` is written out because
+    it is the quantity that must not exceed the spectral weight.
+    """
+
+    arr = np.asarray(textures, dtype=float)
+    if arr.ndim != 3 or arr.shape[2] != 3:
+        raise ValueError("textures must have shape (n_kpoints, n_bands, 3)")
+    rows = ["# ik band spin_x spin_y spin_z spin_norm"]
+    for ik in range(arr.shape[0]):
+        for ib in range(arr.shape[1]):
+            sx, sy, sz = arr[ik, ib]
+            norm = float(np.linalg.norm(arr[ik, ib]))
+            rows.append(f"{ik + 1:d} {ib + 1:d} {sx:.12f} {sy:.12f} {sz:.12f} {norm:.12f}")
+    Path(path).write_text("\n".join(rows) + "\n")
+
+
+def read_spin_texture_table(
+    path: str | Path,
+    n_kpoints: int,
+    n_bands: int,
+) -> NDArray[np.float64]:
+    """Read back a table written by :func:`write_spin_texture_table`."""
+
+    textures = np.zeros((n_kpoints, n_bands, 3), dtype=float)
+    seen = np.zeros((n_kpoints, n_bands), dtype=bool)
+    for raw in Path(path).read_text().splitlines():
+        line = raw.strip()
+        if not line or line.startswith("#"):
+            continue
+        parts = line.split()
+        if len(parts) < 5:
+            raise ValueError("spin texture rows must be: ik band Sx Sy Sz [|S|]")
+        ik = int(parts[0]) - 1
+        ib = int(parts[1]) - 1
+        if not (0 <= ik < n_kpoints and 0 <= ib < n_bands):
+            raise ValueError(f"spin texture index ({ik + 1}, {ib + 1}) outside the band grid")
+        textures[ik, ib] = [float(value) for value in parts[2:5]]
+        seen[ik, ib] = True
+    if not seen.all():
+        raise ValueError("spin texture table does not cover every (k-point, band)")
+    return textures
+
+
 def write_unfolded(
     path: str | Path,
     kmap: QEKMap,
@@ -453,7 +598,7 @@ def qe_effective_band_structure(
 def weights_from_coefficient_table(
     coeff_path: str | Path,
     kmap: QEKMap,
-    transform: NDArray[np.float64],
+    transform: TransformLike,
     n_bands: int,
     *,
     tol: float = 1e-6,
@@ -480,210 +625,3 @@ def write_qe_path_files(
     write_kmap(kmap, qe_path)
     write_ticks(ticks, qe_path)
     return qe_path
-
-
-def color_from_weight(weight: float) -> str:
-    stops = np.array(
-        [[68, 1, 84], [49, 104, 142], [53, 183, 121], [253, 231, 37]],
-        dtype=float,
-    )
-    value = float(np.clip(weight, 0.0, 1.0))
-    scaled = value * (len(stops) - 1)
-    idx = min(int(np.floor(scaled)), len(stops) - 2)
-    frac = scaled - idx
-    rgb = (1.0 - frac) * stops[idx] + frac * stops[idx + 1]
-    return "#" + "".join(f"{int(round(channel)):02x}" for channel in rgb)
-
-
-def plot_unfolded(
-    path: str | Path,
-    kmap: QEKMap,
-    energies: NDArray[np.float64],
-    weights: NDArray[np.float64],
-    ticks: tuple[list[float], list[str]],
-    *,
-    fermi: float = 0.0,
-    emin: float | None = None,
-    emax: float | None = None,
-    marker_scale: float = 28.0,
-) -> Path:
-    try:
-        import matplotlib.pyplot as plt
-    except ImportError:
-        return plot_unfolded_svg(
-            path,
-            kmap,
-            energies,
-            weights,
-            ticks,
-            fermi=fermi,
-            emin=emin,
-            emax=emax,
-            marker_scale=marker_scale,
-        )
-
-    out_path = Path(path)
-    fig, ax = plt.subplots(figsize=(7.2, 4.8), dpi=180)
-    x_values = np.repeat(kmap.distances, energies.shape[1])
-    y_values = (energies - fermi).reshape(-1)
-    clipped_weights = np.clip(weights.reshape(-1), 0.0, 1.0)
-    scatter = ax.scatter(
-        x_values,
-        y_values,
-        s=3.0 + marker_scale * clipped_weights,
-        c=clipped_weights,
-        cmap="viridis",
-        vmin=0.0,
-        vmax=1.0,
-        linewidths=0.0,
-        alpha=0.85,
-    )
-    tick_x, tick_labels = ticks
-    for xpos in tick_x:
-        ax.axvline(xpos, color="0.75", lw=0.7, zorder=0)
-    if tick_x:
-        ax.set_xticks(tick_x, tick_labels)
-    ax.axhline(0.0, color="0.35", lw=0.8, ls="--")
-    x_min = float(kmap.distances.min())
-    x_max = float(kmap.distances.max())
-    if np.isclose(x_min, x_max):
-        x_min -= 0.5
-        x_max += 0.5
-    ax.set_xlim(x_min, x_max)
-    if emin is not None or emax is not None:
-        ax.set_ylim(emin, emax)
-    ax.set_ylabel("Energy - Ef (eV)" if fermi else "Energy (eV)")
-    ax.set_xlabel("Primitive-cell k-path")
-    fig.colorbar(scatter, ax=ax, pad=0.02).set_label("Spectral weight")
-    fig.tight_layout()
-    fig.savefig(out_path)
-    plt.close(fig)
-    return out_path
-
-
-def plot_unfolded_svg(
-    path: str | Path,
-    kmap: QEKMap,
-    energies: NDArray[np.float64],
-    weights: NDArray[np.float64],
-    ticks: tuple[list[float], list[str]],
-    *,
-    fermi: float = 0.0,
-    emin: float | None = None,
-    emax: float | None = None,
-    marker_scale: float = 28.0,
-) -> Path:
-    svg_path = Path(path)
-    if svg_path.suffix.lower() != ".svg":
-        svg_path = svg_path.with_suffix(".svg")
-    width, height = 900, 600
-    left, right, top, bottom = 82, 28, 30, 70
-    plot_w = width - left - right
-    plot_h = height - top - bottom
-    x_min = float(kmap.distances.min())
-    x_max = float(kmap.distances.max())
-    if np.isclose(x_min, x_max):
-        x_min -= 0.5
-        x_max += 0.5
-    y_values = energies - fermi
-    y_min = float(np.min(y_values) if emin is None else emin)
-    y_max = float(np.max(y_values) if emax is None else emax)
-    if np.isclose(y_min, y_max):
-        y_min -= 1.0
-        y_max += 1.0
-
-    def sx(value: float) -> float:
-        return left + (value - x_min) / (x_max - x_min) * plot_w
-
-    def sy(value: float) -> float:
-        return top + (y_max - value) / (y_max - y_min) * plot_h
-
-    tick_x, tick_labels = ticks
-    rows = [
-        (
-            f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" '
-            f'height="{height}" viewBox="0 0 {width} {height}">'
-        ),
-        '<rect width="100%" height="100%" fill="white"/>',
-        (
-            f'<rect x="{left}" y="{top}" width="{plot_w}" height="{plot_h}" '
-            'fill="white" stroke="#222" stroke-width="1"/>'
-        ),
-    ]
-    for xpos, label in zip(tick_x, tick_labels, strict=True):
-        px = sx(xpos)
-        rows.append(
-            
-                f'<line x1="{px:.2f}" y1="{top}" x2="{px:.2f}" '
-                f'y2="{top + plot_h}" stroke="#c8c8c8" stroke-width="1"/>'
-            
-        )
-        rows.append(
-            
-                f'<text x="{px:.2f}" y="{height - 36}" '
-                'font-family="Arial, sans-serif" font-size="15" '
-                f'text-anchor="middle">{html.escape(label)}</text>'
-            
-        )
-    if y_min <= 0.0 <= y_max:
-        y0 = sy(0.0)
-        rows.append(
-            
-                f'<line x1="{left}" y1="{y0:.2f}" x2="{left + plot_w}" '
-                f'y2="{y0:.2f}" stroke="#666" stroke-width="1" '
-                'stroke-dasharray="5,5"/>'
-            
-        )
-    for tick in np.linspace(y_min, y_max, 6):
-        py = sy(float(tick))
-        rows.append(
-            
-                f'<line x1="{left - 5}" y1="{py:.2f}" x2="{left}" '
-                f'y2="{py:.2f}" stroke="#222" stroke-width="1"/>'
-            
-        )
-        rows.append(
-            
-                f'<text x="{left - 10}" y="{py + 5:.2f}" '
-                'font-family="Arial, sans-serif" font-size="13" '
-                f'text-anchor="end">{tick:.2f}</text>'
-            
-        )
-    max_radius = max(2.0, 1.5 + marker_scale * 0.12)
-    for ik, distance in enumerate(kmap.distances):
-        px = sx(float(distance))
-        for ib in range(energies.shape[1]):
-            weight = float(np.clip(weights[ik, ib], 0.0, 1.0))
-            py = sy(float(y_values[ik, ib]))
-            radius = 1.2 + max_radius * weight
-            color = color_from_weight(weight)
-            rows.append(
-                
-                    f'<circle cx="{px:.2f}" cy="{py:.2f}" r="{radius:.2f}" '
-                    f'fill="{color}" fill-opacity="0.82"/>'
-                
-            )
-    ylabel = "Energy - Ef (eV)" if fermi else "Energy (eV)"
-    rows.extend(
-        [
-            (
-                f'<text x="{left + plot_w / 2:.2f}" y="{height - 12}" '
-                'font-family="Arial, sans-serif" font-size="16" '
-                'text-anchor="middle">Primitive-cell k-path</text>'
-            ),
-            (
-                f'<text x="22" y="{top + plot_h / 2:.2f}" '
-                'font-family="Arial, sans-serif" font-size="16" '
-                'text-anchor="middle" '
-                f'transform="rotate(-90 22 {top + plot_h / 2:.2f})">'
-                f"{html.escape(ylabel)}</text>"
-            ),
-            (
-                '<text x="730" y="32" font-family="Arial, sans-serif" '
-                'font-size="13">color/size = spectral weight</text>'
-            ),
-            "</svg>",
-        ]
-    )
-    svg_path.write_text("\n".join(rows) + "\n")
-    return svg_path

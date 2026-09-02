@@ -1,192 +1,82 @@
 # UnfoldLab
 
-UnfoldLab is the starting point for a research-grade Python library for band
-unfolding, spectral analysis, and supercell interpretation across arbitrary
-materials and model systems.
+A material-agnostic Python toolkit for **band unfolding**, spectral analysis and
+supercell interpretation, together with a machine-checked formal model of the
+mathematics it implements.
 
-The project is VASP-first for structural mapping workflows and now includes a
-packaged Quantum ESPRESSO backend for plane-wave coefficient unfolding. The
-layout is designed for multiple backends: projector-based unfolding, plane-wave
-coefficient unfolding, Wannier and tight-binding workflows, and generic HDF5
-inputs.
+Given a supercell calculation and the integer transformation `T` relating the
+supercell to a primitive reference cell, UnfoldLab reconstructs the *effective
+band structure* in the primitive Brillouin zone: for every supercell eigenstate
+it computes how much of its weight belongs to each primitive k-point of the
+fiber, and turns those weights into fat bands, spectral functions, densities of
+states, Fermi levels, spin textures and effective masses.
 
-The design philosophy is material-agnostic:
+## What is in the repository
 
-```text
-This is a general band-unfolding, spectral-analysis, and supercell-interpretation
-library for arbitrary materials and model systems.
-```
+| Path | Contents |
+| --- | --- |
+| `unfoldlab/core/` | the unfolding kernels: folding maps, plane-wave matching, weights and sum rules, spectral broadening, DOS, Fermi level, projections, tight binding, LCAO, phonons, symmetry, disorder ensembles |
+| `unfoldlab/io/` | readers and writers: VASP `WAVECAR` / `PROCAR` / `EIGENVAL`, Quantum ESPRESSO `.dat`, HDF5 and XML, Wannier90 `_hr.dat` / `_tb.dat`, JSON/HDF5 serialization, plotting |
+| `unfoldlab/twist/` | commensurate twist angles, moiré cells and stack diagnostics |
+| `unfoldlab/workflows/` | end-to-end problem definitions and backend drivers |
+| `unfoldlab/cli/` | the `unfoldlab` command line, scriptable and guided |
+| `lean-proofs/RequestProject/` | optional local Lean 4 + Mathlib proof bundle, kept untracked |
+| `tests/` | the test suite, including synthetic VASP/QE fixtures |
+| `docs/` | review log, formal-model map, roadmap, benchmarks, progress tracker |
+| `examples/` | runnable toy models that need no DFT run |
 
-Material-specific workflows belong in optional tutorials or user configuration,
-not in core APIs, class names, projection syntax, or algorithmic assumptions.
-
-## Initial scope
-
-- Parse core VASP inputs and outputs: `POSCAR`, `CONTCAR`, `KPOINTS`,
-  `EIGENVAL`, and eventually `PROCAR`/`WAVECAR`.
-- Generate Quantum ESPRESSO folded supercell k-paths and compute true
-  plane-wave unfolding weights from `wfc*.hdf5`, `wfc*.h5`, `wfc*.dat`, or
-  exported coefficient tables.
-- Detect primitive-to-supercell transformation matrices, including non-diagonal
-  integer transforms.
-- Fold primitive-path k-points into required supercell k-points.
-- Represent effective band structures and broaden them into spectral intensity
-  maps.
-- Provide clear diagnostics for commensurability, missing k-points, and spectral
-  weight normalization.
-- Treat arbitrary reference-resolved workflows as first-class design targets:
-  primitive cells, conventional cells, layers, substrates, adsorbates,
-  interfaces, molecule-like projection bases, moire mini-zones, local
-  approximate Brillouin zones, and user-defined reciprocal references.
-- Keep projections generic through selectors such as `species:*`, `atom:4`,
-  `orbital:d`, `layer:0`, `region:defect_core`, `surface:top`, `interface:A`,
-  `valley:example`, and `spin:z`.
-
-## Generic systems in scope
-
-UnfoldLab should support or prepare for standard crystalline supercells,
-defects, disorder, alloys, slabs, reconstructed surfaces, adsorbates,
-interfaces, magnetic supercells, spinor calculations, lattice instabilities,
-layered systems, rotated heterostructures, moire superlattices, Wannier models,
-tight-binding models, and generic Hamiltonian matrices.
-
-Specific materials may appear later as optional tutorial instances of these
-general methods, never as built-in design targets.
-
-## Quick start from a checkout
+## Installation
 
 ```bash
-python -m venv .venv
-source .venv/bin/activate
-pip install -e ".[dev]"
-pytest
+pip install -e ".[io,plot,dev]"
 ```
 
-Inspect a primitive/supercell mapping:
+The optional extras gate the HDF5 readers (`h5py`), the plotting backends
+(`matplotlib`, `plotly`) and the development tools.  Every plot has a
+dependency-free SVG fallback, so the core workflows run on `numpy` alone.
+
+## A one-second example
 
 ```bash
-unfoldlab vasp map --primitive primitive/POSCAR --supercell supercell/POSCAR
+unfoldlab model unfold --model examples/toy_1d_chain.json \
+    --matrix "3 0 0 0 1 0 0 0 1" --kpoint 0.05,0,0
+
+unfoldlab model bands --model examples/toy_1d_chain_defect.json \
+    --matrix "3 0 0 0 1 0 0 0 1" --path 0,0,0:0.5,0,0 --points 51 \
+    --json chain_ebs.json
 ```
 
-Launch a guided VASPKIT-style menu instead of typing subcommands:
+For the perfect chain each supercell state returns weight one on a single
+primitive k-point — band folding undone.  For the defect model the weight
+spreads across the fiber and the reported `sum_rules` confirm that it is
+conserved.  See `docs/examples.md` for the DFT-backed workflows.
+
+## The formal model
+
+`lean-proofs/RequestProject/` is an optional local Lean 4 development, built
+against Mathlib, that states and proves the identities the numerics rely on:
+the fiber sum rule, representative independence of the weights, the exact
+integer matching criterion, conservation of spectral weight under broadening,
+chunking identities, non-orthogonal LCAO sum rules, and machine-checked
+counterexamples for known pitfalls.
 
 ```bash
-unfoldlab
+cd lean-proofs
+lake build
 ```
 
-Fold explicit primitive fractional k-points into the supercell Brillouin zone:
+`docs/formal-model.md` maps each Lean statement to the Python function it
+governs.
+
+## Development gates
 
 ```bash
-unfoldlab vasp fold-kpoints \
-  --primitive primitive/POSCAR \
-  --supercell supercell/POSCAR \
-  --kpoint G:0,0,0 \
-  --kpoint X:0.5,0,0
+python -m pytest -q          # test suite
+ruff check .                 # lint
+mypy unfoldlab               # types
+cd lean-proofs && lake build # optional local formal model, if present
 ```
 
-Parse generic projection selectors:
-
-```python
-from unfoldlab import ProjectionSelector
-
-selectors = [
-    ProjectionSelector.parse("species:*"),
-    ProjectionSelector.parse("orbital:d"),
-    ProjectionSelector.parse("surface:top"),
-    ProjectionSelector.parse("spin:z"),
-]
-```
-
-Generate a folded supercell path for either backend:
-
-```bash
-unfoldlab make-kpoints --code qe path.json \
-  --kpoints qe_kpoints_supercell.in \
-  --kmap kmap.tsv \
-  --ticks path_ticks.tsv
-
-unfoldlab make-kpoints --code vasp path.json \
-  --kpoints KPOINTS \
-  --kmap kmap.tsv \
-  --ticks path_ticks.tsv
-```
-
-Compute and plot QE unfolded bands from saved wavefunctions:
-
-```bash
-unfoldlab unfold \
-  --code qe \
-  --bands bands.dat.gnu \
-  --kmap kmap.tsv \
-  --qe-save-dir ./qe_tmp/supercell.save \
-  --matrix "2 0 0 0 2 0 0 0 1" \
-  --fermi 5.43 \
-  --out unfolded_bands.dat \
-  --plot unfolded_bands.png \
-  --write-weights weights.dat
-```
-
-Compute and plot VASP unfolded bands from `WAVECAR`:
-
-```bash
-unfoldlab unfold \
-  --code vasp \
-  --kmap kmap.tsv \
-  --wavecar WAVECAR \
-  --matrix "2 0 0 0 2 0 0 0 1" \
-  --fermi 5.43 \
-  --out unfolded_bands.dat \
-  --plot unfolded_bands.png \
-  --write-weights weights.dat
-```
-
-## Backend unification
-
-UnfoldLab uses one backend-neutral plane-wave unfolding contract for QE and
-VASP `WAVECAR` support:
-
-```text
-A_sc = T @ A_pc
-K_sc = k_pc @ T.T
-(K_sc + G_sc) @ inv(T).T - k_pc must be an integer vector
-```
-
-QE and VASP wavefunctions are normalized into `PlaneWaveKPointData` before
-weights are computed. If the primitive path, transformation matrix, energies,
-G-vectors, and normalized coefficients are equivalent, VASP and QE unfolding
-weights should agree within numerical tolerance.
-
-Define material-dependent valleys explicitly:
-
-```python
-from unfoldlab import ValleyDefinition
-
-valley = ValleyDefinition(
-    label="example_valley",
-    center_frac=[0.333333, 0.333333, 0.0],
-    radius=0.05,
-    reference_bz="layer_1",
-)
-```
-
-Twist/reference workflows accept loaded `Structure` objects, VASP POSCAR/CONTCAR
-files, or QE `pw.x` inputs with `CELL_PARAMETERS` and `ATOMIC_POSITIONS`:
-
-```python
-from unfoldlab import TwistedUnfoldingProblem
-
-problem = TwistedUnfoldingProblem.from_qe(
-    references={"layer": "primitive.in"},
-    supercell="supercell.in",
-)
-```
-
-## Current status
-
-This repository has tested numerical primitives, VASP structure/EIGENVAL
-workflow helpers, VASP `WAVECAR` plane-wave unfolding, and an installable QE
-plane-wave unfolding backend.
-
-## License
-
-No public license has been selected yet.
+`docs/progress.md` records the state of every area and the backlog;
+`docs/findings.md` is the append-only log of what was wrong and how it was
+fixed.

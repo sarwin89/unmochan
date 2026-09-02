@@ -4,8 +4,12 @@ __pycache__/
 *.py[cod]
 *.egg-info/
 .pytest_cache/
+tmp-pytest/
+.tmp-pytest/
+.tmp-pycache/
 .ruff_cache/
 .mypy_cache/
+lean-proofs/
 .coverage
 htmlcov/
 build/

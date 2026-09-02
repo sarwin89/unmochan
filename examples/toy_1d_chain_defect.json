@@ -1,0 +1,9 @@
+{
+  "comment": "The same chain with one raised on-site energy in cell 1 of the supercell: a substitutional defect that mixes the fiber.",
+  "n_orbitals": 1,
+  "hoppings": [
+    {"cell": [0, 0, 0], "matrix": [[0.0]]},
+    {"cell": [1, 0, 0], "matrix": [[-1.0]]}
+  ],
+  "perturbations": [{"cell": 1, "orbital": 0, "value": 1.5}]
+}

@@ -28,6 +28,7 @@ plot = [
   "plotly>=5.20",
 ]
 dev = [
+  "build>=1.2",
   "pytest>=8.0",
   "ruff>=0.4",
   "mypy>=1.10",
@@ -42,6 +43,15 @@ packages = ["unfoldlab"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-q"
+markers = [
+  "unit: fast unit tests for core algorithms and parsers",
+  "cli: command-line and guided-mode tests",
+  "integration: end-to-end synthetic workflow tests",
+  "parity: backend-neutral VASP/QE equivalence tests",
+  "plot: tests that generate or validate plots",
+  "slow: longer-running checks excluded from the default tight loop",
+  "io_real: optional tests that require real external DFT output fixtures",
+]
 
 [tool.ruff]
 line-length = 100
@@ -49,3 +59,11 @@ target-version = "py310"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B"]
+
+[tool.mypy]
+python_version = "3.10"
+ignore_missing_imports = false
+
+[[tool.mypy.overrides]]
+module = ["h5py.*"]
+ignore_missing_imports = true

@@ -65,7 +65,7 @@ def test_read_synthetic_spinor_wavecar_sums_components(tmp_path: Path):
         wavecar,
         lattice=lattice,
         encut=encut,
-        rtag=53300,
+        rtag=45200,
         kpoints=np.array([[0.0, 0.0, 0.0]]),
         energies=np.array([[0.5]]),
         occupations=np.array([[1.0]]),

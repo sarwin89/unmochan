@@ -2,16 +2,20 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterable
 from dataclasses import dataclass, field
 from pathlib import Path
 
 import numpy as np
 from numpy.typing import NDArray
 
+from unfoldlab.core.kpoints import KPoint
+from unfoldlab.core.spectral import EffectiveBandStructure
 from unfoldlab.core.structures import Structure
 from unfoldlab.io.qe import read_pw_input_structure
 from unfoldlab.io.vasp import read_poscar
 from unfoldlab.twist.geometry import assign_layers_by_axis, in_plane_twist_angle
+from unfoldlab.workflows.problem import unfold_supercell_to_lattice
 
 
 @dataclass
@@ -38,8 +42,7 @@ class TwistedUnfoldingProblem:
         if not references:
             raise ValueError("at least one reference structure is required")
         loaded_references = {
-            label: _load_structure(structure, code=code)
-            for label, structure in references.items()
+            label: _load_structure(structure, code=code) for label, structure in references.items()
         }
         return cls(
             references=loaded_references,
@@ -110,7 +113,12 @@ class TwistedUnfoldingProblem:
         reference_a: str | None = None,
         reference_b: str | None = None,
     ) -> NDArray[np.float64]:
-        """Return the reciprocal-lattice difference between two references."""
+        """Return the reciprocal-lattice difference ``B_a - B_b``.
+
+        Note that for a layered stack this matrix is singular -- the shared
+        stacking direction contributes a zero row -- so it cannot be inverted to
+        obtain the real-space moire cell.  Use :meth:`moire_lattice` for that.
+        """
 
         labels = list(self.references)
         if reference_a is None or reference_b is None:
@@ -118,9 +126,10 @@ class TwistedUnfoldingProblem:
                 raise ValueError("at least two references are required for a moire lattice")
             reference_a = labels[0] if reference_a is None else reference_a
             reference_b = labels[1] if reference_b is None else reference_b
-        return self.references[reference_a].reciprocal_lattice - self.references[
-            reference_b
-        ].reciprocal_lattice
+        return (
+            self.references[reference_a].reciprocal_lattice
+            - self.references[reference_b].reciprocal_lattice
+        )
 
     def get_reference(self, label: str) -> Structure:
         try:
@@ -131,19 +140,166 @@ class TwistedUnfoldingProblem:
                 f"unknown reference {label!r}; available references: {available}"
             ) from exc
 
-    def unfold_to_reference(self, label: str) -> None:
-        """Placeholder for future reference-resolved unfolding backends."""
+    def moire_lattice(
+        self,
+        reference_a: str | None = None,
+        reference_b: str | None = None,
+        *,
+        axis: int = 2,
+        atol: float = 1e-8,
+    ) -> NDArray[np.float64]:
+        """Real-space moire lattice of two references.
 
-        self.get_reference(label)
-        raise NotImplementedError(
-            "reference-resolved unfolding backends are not implemented yet; "
-            "this API reserves a material-agnostic target reference"
+        The moire reciprocal lattice is the difference of the two reciprocal
+        lattices, ``B_m = B_a - B_b``.  For a layered system that difference is
+        *singular as a 3x3 matrix*: the two layers share their stacking axis, so
+        the third row of ``B_m`` vanishes and
+        :meth:`build_moire_reciprocal_lattice` cannot simply be inverted.  The
+        moire pattern lives in the plane perpendicular to ``axis``, so the
+        in-plane 2x2 block is inverted instead and the stacking direction is
+        taken from the supercell, which is the cell the wavefunctions live in.
+
+        Two references whose in-plane reciprocal lattices agree produce no moire
+        pattern and are rejected, as is a difference with a component along the
+        stacking axis (the two references are then not a layered stack).
+        """
+
+        if axis not in (0, 1, 2):
+            raise ValueError("axis must be 0, 1, or 2")
+        moire_reciprocal = self.build_moire_reciprocal_lattice(reference_a, reference_b)
+        in_plane = [index for index in range(3) if index != axis]
+        if float(np.max(np.abs(moire_reciprocal[in_plane, axis]))) > atol:
+            raise ValueError(
+                "the difference of the two reciprocal lattices has a component along "
+                f"axis {axis}; the references do not share a stacking direction"
+            )
+        block = moire_reciprocal[np.ix_(in_plane, in_plane)]
+        determinant = float(np.linalg.det(block))
+        if not np.isfinite(determinant) or abs(determinant) < atol:
+            raise ValueError(
+                "the two references have (nearly) equal in-plane reciprocal lattices, "
+                "so they define no moire cell"
+            )
+        lattice = np.zeros((3, 3), dtype=float)
+        lattice[np.ix_(in_plane, in_plane)] = 2.0 * np.pi * np.linalg.inv(block).T
+        lattice[axis] = np.asarray(self.supercell_structure.lattice, dtype=float)[axis]
+        return lattice
+
+    def unfold_to_reference(
+        self,
+        label: str,
+        *,
+        kpath: Iterable[KPoint],
+        code: str = "vasp",
+        wavecar: str | Path | None = None,
+        qe_save_dir: str | Path | None = None,
+        bands: str | Path | None = None,
+        spin: int = 1,
+        tol: float = 1e-6,
+        atol: float = 1e-6,
+        operations: NDArray[np.integer] | None = None,
+        reference_energy: float = 0.0,
+    ) -> EffectiveBandStructure:
+        """Unfold the supercell wavefunction onto one reference's Brillouin zone.
+
+        Each reference of a commensurate stack is an integer sublattice of the
+        supercell -- that is what commensurability means -- so the ordinary
+        plane-wave unfolding kernel applies once the transform ``A_sc = T A_ref``
+        of *that* reference is used.  For a twisted bilayer this gives the band
+        structure resolved onto the chosen layer's own (rotated) Brillouin zone.
+
+        Both backends are available: ``code="vasp"`` reads a ``WAVECAR`` and
+        ``code="qe"`` a ``.save`` directory, whose XML also supplies the
+        eigenvalues unless a ``bands`` file is given.
+        """
+
+        reference = self.get_reference(label)
+        return unfold_supercell_to_lattice(
+            code,
+            wavecar=self._resolve_wavecar(wavecar) if code == "vasp" else None,
+            qe_save_dir=self._resolve_qe_save_dir(qe_save_dir) if code == "qe" else None,
+            bands=bands if code == "qe" else None,
+            supercell_lattice=self.supercell_structure.lattice,
+            target_lattice=reference.lattice,
+            kpath=kpath,
+            spin=spin,
+            tol=tol,
+            atol=atol,
+            operations=operations,
+            reference_energy=reference_energy,
+            metadata={"reference": label},
         )
 
-    def unfold_to_moire_bz(self) -> None:
-        """Placeholder for future moire-mini-zone unfolding backends."""
+    def unfold_to_moire_bz(
+        self,
+        *,
+        kpath: Iterable[KPoint],
+        reference_a: str | None = None,
+        reference_b: str | None = None,
+        code: str = "vasp",
+        wavecar: str | Path | None = None,
+        qe_save_dir: str | Path | None = None,
+        bands: str | Path | None = None,
+        spin: int = 1,
+        tol: float = 1e-6,
+        atol: float = 1e-6,
+        operations: NDArray[np.integer] | None = None,
+        reference_energy: float = 0.0,
+    ) -> EffectiveBandStructure:
+        """Unfold onto the moire mini Brillouin zone.
 
-        raise NotImplementedError("moire Brillouin-zone unfolding is not implemented yet")
+        This is meaningful when the calculation cell is a repetition of the
+        moire cell; if the two coincide the transform is the identity and every
+        weight is one, which is the correct -- if uninformative -- answer.  A
+        supercell that is not an integer multiple of the moire cell is rejected
+        by the transform detection.
+        """
+
+        return unfold_supercell_to_lattice(
+            code,
+            wavecar=self._resolve_wavecar(wavecar) if code == "vasp" else None,
+            qe_save_dir=self._resolve_qe_save_dir(qe_save_dir) if code == "qe" else None,
+            bands=bands if code == "qe" else None,
+            supercell_lattice=self.supercell_structure.lattice,
+            target_lattice=self.moire_lattice(reference_a, reference_b),
+            kpath=kpath,
+            spin=spin,
+            tol=tol,
+            atol=atol,
+            operations=operations,
+            reference_energy=reference_energy,
+            metadata={"target": "moire"},
+        )
+
+    def _resolve_wavecar(self, wavecar: str | Path | None) -> Path:
+        if wavecar is not None:
+            return Path(wavecar)
+        if self.outputs is None:
+            raise ValueError("provide wavecar, or set outputs on the problem")
+        outputs = Path(self.outputs)
+        candidate = outputs / "WAVECAR" if outputs.is_dir() else outputs
+        if not candidate.is_file():
+            raise FileNotFoundError(f"no WAVECAR found at {candidate}")
+        return candidate
+
+    def _resolve_qe_save_dir(self, qe_save_dir: str | Path | None) -> Path:
+        if qe_save_dir is not None:
+            return Path(qe_save_dir)
+        if self.outputs is None:
+            raise ValueError("provide qe_save_dir, or set outputs on the problem")
+        outputs = Path(self.outputs)
+        if outputs.is_dir():
+            if (outputs / "data-file-schema.xml").is_file():
+                return outputs
+            candidates = sorted(outputs.glob("*.save"))
+            if len(candidates) == 1:
+                return candidates[0]
+            if len(candidates) > 1:
+                names = ", ".join(candidate.name for candidate in candidates)
+                raise ValueError(
+                    f"{outputs} holds several save directories ({names}); pass qe_save_dir"
+                )
+        raise FileNotFoundError(f"no QE .save directory found at {outputs}")
 
 
 def _load_structure(structure: str | Path | Structure, *, code: str = "auto") -> Structure:

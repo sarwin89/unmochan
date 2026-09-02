@@ -1,0 +1,10 @@
+{
+  "comment": "The spring chain of toy_1d_phonon_chain with a heavy isotope on one cell of a three-cell supercell: a pure mass defect, which rescales a row and a column of the dynamical matrix rather than shifting one diagonal entry.",
+  "masses": [2.0],
+  "force_constants": [
+    {"cell": [0, 0, 0], "matrix": [[2.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0]]},
+    {"cell": [1, 0, 0], "matrix": [[-1.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0]]}
+  ],
+  "symmetrize": true,
+  "site_masses": [{"cell": 1, "atom": 0, "mass": 8.0}]
+}

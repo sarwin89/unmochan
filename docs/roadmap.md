@@ -24,7 +24,8 @@ of a general method, not a core design assumption.
 
 ## Milestone 3: Spectral-function plotting, projections, and serialization
 
-- Add Gaussian, Lorentzian, and adaptive broadening.
+- Add Gaussian, Lorentzian, and adaptive broadening: done, with weight
+  conservation proved for per-state widths.
 - Support universal projection selectors for species, atoms, orbitals, layers,
   sublattices, regions, defect shells, surfaces, interfaces, adsorbates,
   substrates, molecule-like components, valleys, and spin channels.
@@ -36,8 +37,14 @@ of a general method, not a core design assumption.
 ## Milestone 4: Rigorous VASP wavefunction backend
 
 - Expand `WAVECAR` validation against real VASP files from multiple versions.
-- Add gamma-only reconstruction when a code-independent reconstruction strategy
-  is available.
+- Gamma-only reconstruction: done (time-reversal expansion of the stored half
+  basis, both VASP half-space conventions).
+- Unfolding from symmetry-reduced wavefunction sets: done for VASP and QE.
+  Point-group operations can be supplied by the user or detected with
+  `unfoldlab detect-symmetry`.
+- Spin-resolved unfolding: component-resolved weights and the full spin texture
+  of a noncollinear WAVECAR are done; the texture is deliberately unavailable
+  in symmetry-reduced mode, because the spin rotates with the operation.
 - Compare plane-wave and projection-based approximations.
 
 ## Milestone 5: Generic reference-resolved and moire workflows
@@ -84,6 +91,16 @@ of a general method, not a core design assumption.
 
 ## Completed backend foundations
 
+- Tight-binding, Wannier and model-Hamiltonian unfolding, with both sum rules
+  (over the fiber and over the bands) checked at runtime and proved in
+  `lean-proofs/RequestProject/Unfolding/TightBinding.lean`.  Models are read either from a
+  small JSON format or from a Wannier90 `seedname_hr.dat` or `seedname_tb.dat`,
+  and unfolded either over the fiber of a supercell k-point
+  (`unfoldlab model unfold`) or along a path in the primitive Brillouin zone
+  (`unfoldlab model bands`).  Orbital-projected fat bands
+  (`unfoldlab model bands --group ...`) say which orbital, sublattice or layer
+  carries the unfolded weight, with additivity and the projected fiber sum rule
+  proved alongside the plain sum rules.
 - Packaged Quantum ESPRESSO folded-path generation and plane-wave unfolding
   from saved wavefunctions, external weight tables, or coefficient tables.
 - VASP `WAVECAR` plane-wave unfolding through the same matching kernel used by QE.
@@ -91,6 +108,7 @@ of a general method, not a core design assumption.
 
 ## Later milestones
 
-- Wannier90 and tight-binding backends.
 - Generic HDF5 backends beyond QE wavefunction layouts.
+- Wannier90 beyond `seedname_hr.dat` and `seedname_tb.dat`: `_centres.xyz`, and
+  disentanglement metadata.
 - Textbook-level theory documentation and benchmark galleries.

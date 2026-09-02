@@ -8,9 +8,10 @@ from pathlib import Path
 import numpy as np
 from numpy.typing import NDArray
 
+from unfoldlab.core.numerics import TransformLike
 from unfoldlab.core.spectral import EffectiveBandStructure
+from unfoldlab.io.plot_bands import plot_unfolded
 from unfoldlab.io.qe import (
-    plot_unfolded,
     qe_effective_band_structure,
     read_gnu_blocks,
     read_kmap,
@@ -21,6 +22,7 @@ from unfoldlab.io.qe import (
     write_weight_table,
 )
 from unfoldlab.io.qe_wfc import compute_weights_from_qe_save
+from unfoldlab.io.qe_xml import read_qe_xml_eigenvalues
 
 
 @dataclass(frozen=True)
@@ -36,13 +38,24 @@ def compute_qe_weights(
     *,
     save_dir: str | Path,
     kmap: str | Path,
-    transform: NDArray[np.float64],
+    transform: TransformLike,
     n_bands: int,
     tol: float = 1e-6,
     spin: int | None = None,
     wfc_pattern: str | None = None,
     wfc_format: str = "auto",
+    lattice_alat: NDArray[np.float64] | None = None,
+    operations: NDArray[np.integer] | None = None,
 ) -> NDArray[np.float64]:
+    """Unfolding weights for a k-map and a QE ``.save`` directory.
+
+    ``lattice_alat`` (QE's ``at`` matrix for the supercell) enables the
+    cross-check of the k-point stored in each wavefunction file against the
+    k-map, and is required by the symmetry-reduced mode selected with
+    ``operations``; see
+    :func:`unfoldlab.io.qe_wfc.compute_weights_from_qe_save`.
+    """
+
     mapping = read_kmap(kmap)
     return compute_weights_from_qe_save(
         save_dir,
@@ -54,28 +67,41 @@ def compute_qe_weights(
         spin=spin,
         pattern=wfc_pattern,
         file_format=wfc_format,
+        lattice_alat=lattice_alat,
+        operations=operations,
     )
 
 
 def build_qe_effective_band_structure(
     *,
-    bands: str | Path,
+    bands: str | Path | None = None,
     kmap: str | Path,
     weights: str | Path | None = None,
     qe_save_dir: str | Path | None = None,
     coefficients: str | Path | None = None,
-    transform: NDArray[np.float64] | None = None,
+    transform: TransformLike | None = None,
     reference_energy: float = 0.0,
     tol: float = 1e-6,
     spin: int | None = None,
     wfc_pattern: str | None = None,
     wfc_format: str = "auto",
+    lattice_alat: NDArray[np.float64] | None = None,
+    operations: NDArray[np.integer] | None = None,
 ) -> tuple[EffectiveBandStructure, str]:
-    _, energies = read_gnu_blocks(bands)
+    if bands is not None:
+        _, energies = read_gnu_blocks(bands)
+        energy_source = str(bands)
+    elif qe_save_dir is not None:
+        # The .save XML records the eigenvalues, so a separate bands file is
+        # optional; this also removes one way for the two to disagree.
+        energies = read_qe_xml_eigenvalues(qe_save_dir, spin=spin)
+        energy_source = f"{qe_save_dir} (data-file-schema.xml)"
+    else:
+        raise ValueError("provide bands, or a QE save directory whose XML records the eigenvalues")
     mapping = read_kmap(kmap)
     if mapping.n_kpoints != energies.shape[0]:
         raise ValueError(
-            f"kmap has {mapping.n_kpoints} k-points but bands file has {energies.shape[0]}"
+            f"kmap has {mapping.n_kpoints} k-points but the energies have {energies.shape[0]}"
         )
 
     spectral_weights: NDArray[np.float64]
@@ -93,8 +119,14 @@ def build_qe_effective_band_structure(
             spin=spin,
             pattern=wfc_pattern,
             file_format=wfc_format,
+            lattice_alat=lattice_alat,
+            operations=operations,
         )
-        mode = f"computed spectral weights from QE {wfc_format} wavefunctions"
+        mode = (
+            f"computed spectral weights from QE {wfc_format} wavefunctions"
+            if operations is None
+            else f"computed spectral weights from symmetry-reduced QE {wfc_format} wavefunctions"
+        )
     elif coefficients is not None:
         if transform is None:
             raise ValueError("transform is required when coefficients are used")
@@ -119,7 +151,7 @@ def build_qe_effective_band_structure(
             energies,
             spectral_weights,
             reference_energy=reference_energy,
-            metadata={"bands": str(bands), "kmap": str(kmap), "weight_mode": mode},
+            metadata={"bands": energy_source, "kmap": str(kmap), "weight_mode": mode},
         ),
         mode,
     )
@@ -127,13 +159,13 @@ def build_qe_effective_band_structure(
 
 def unfold_qe_bands(
     *,
-    bands: str | Path,
+    bands: str | Path | None = None,
     kmap: str | Path,
     ticks: str | Path | None = None,
     weights: str | Path | None = None,
     qe_save_dir: str | Path | None = None,
     coefficients: str | Path | None = None,
-    transform: NDArray[np.float64] | None = None,
+    transform: TransformLike | None = None,
     fermi: float = 0.0,
     emin: float | None = None,
     emax: float | None = None,
@@ -145,6 +177,8 @@ def unfold_qe_bands(
     spin: int | None = None,
     wfc_pattern: str | None = None,
     wfc_format: str = "auto",
+    lattice_alat: NDArray[np.float64] | None = None,
+    operations: NDArray[np.integer] | None = None,
 ) -> QEUnfoldResult:
     ebs, mode = build_qe_effective_band_structure(
         bands=bands,
@@ -158,6 +192,8 @@ def unfold_qe_bands(
         spin=spin,
         wfc_pattern=wfc_pattern,
         wfc_format=wfc_format,
+        lattice_alat=lattice_alat,
+        operations=operations,
     )
     mapping = read_kmap(kmap)
 

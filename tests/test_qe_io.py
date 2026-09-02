@@ -174,3 +174,31 @@ def _write_minimal_kmap(tmp_path: Path) -> Path:
     path = tmp_path / "kmap.tsv"
     write_kmap(path, qe_path)
     return path
+
+
+def test_read_kmap_reports_a_short_row(tmp_path: Path):
+    """A malformed k-map is a user error, not an IndexError."""
+
+    kmap = tmp_path / "kmap.dat"
+    kmap.write_text("ik\ts_pc\n1\t0.0\t0.0\t0.0\t0.0\n")
+    with pytest.raises(ValueError, match="line 2"):
+        read_kmap(kmap)
+
+
+def test_read_kmap_reports_a_non_numeric_field(tmp_path: Path):
+    kmap = tmp_path / "kmap.dat"
+    fields = ["1", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "x", "0.0", "0.0", "0.0"]
+    kmap.write_text("\t".join(fields) + "\n")
+    with pytest.raises(ValueError, match="must be numbers"):
+        read_kmap(kmap)
+
+
+def test_read_kmap_accepts_a_space_separated_file(tmp_path: Path):
+    """A hand-written k-map rarely has tabs in it."""
+
+    kmap = tmp_path / "kmap.dat"
+    kmap.write_text("1 0.0 0.125 0.0 0.0 0.25 0.0 0.0 0.25 0.0 0.0 G\n")
+    mapping = read_kmap(kmap)
+    assert np.allclose(mapping.primitive_kpoints, [[0.125, 0.0, 0.0]])
+    assert np.allclose(mapping.supercell_folded_kpoints, [[0.25, 0.0, 0.0]])
+    assert mapping.labels == ("G",)
