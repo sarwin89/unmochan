@@ -53,6 +53,16 @@ primitive k-point — band folding undone.  For the defect model the weight
 spreads across the fiber and the reported `sum_rules` confirm that it is
 conserved.  See `docs/examples.md` for the DFT-backed workflows.
 
+## Project Lineage
+
+Unmochan is the active standalone project.  The historical `unfoldlab` import
+path and console command remain available for compatibility, but new work is
+developed and released under the Unmochan name.
+
+Thanks to [Ritam Chakraborty](https://github.com/ritamcha) for contributions to
+the project direction and implementation.  Thanks also to Prajwal Souza for the
+initial start to the codebase that made this work possible.
+
 ## The formal model
 
 `lean-proofs/RequestProject/` is an optional local Lean 4 development, built

@@ -30,6 +30,10 @@ editable install regenerated both scripts; `unmochan --help` and
 `unfoldlab --help` both start cleanly, with `unmochan` as the primary usage
 name and `unfoldlab` as the compatibility program name.
 
+Active development now targets the public standalone GitHub repository
+`sarwin89/unmochan`. The private `sarwin89/unfoldlab` fork is retained as a
+historical/upstream reference and is not the release target for new work.
+
 Existing performance checks after the rename:
 
 * `examples/benchmark_weights.py`: 35,937 G-vectors, 60 bands, 64 fiber

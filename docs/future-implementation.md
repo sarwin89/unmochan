@@ -6,6 +6,9 @@
   workflow.
 - Document `unmochan` as the primary executable and preserve `unfoldlab vasp ...`
   and `unfoldlab qe ...` as compatibility aliases.
+- Treat the public standalone `sarwin89/unmochan` repository as the only active
+  development target. The private `sarwin89/unfoldlab` fork is retained as a
+  historical/upstream reference rather than a release target.
 - Add neutral names such as `UnfoldingPath` and `KPointMap` for shared path
   models while keeping QE-prefixed aliases working.
 - Keep guided mode focused on DFT workflow steps, not theory pages.

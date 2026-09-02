@@ -9,7 +9,7 @@ description = "UNfolding MOmentum-space Crystal Hamiltonian ANalysis for VASP, Q
 readme = "README.md"
 requires-python = ">=3.10"
 license = "LicenseRef-Proprietary"
-authors = [{ name = "Prajwal Souza" }]
+authors = [{ name = "Unmochan contributors" }]
 dependencies = [
   "click>=8.1",
   "numpy>=1.23",
