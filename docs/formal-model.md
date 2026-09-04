@@ -1,6 +1,6 @@
 # Formal model of band unfolding
 
-The mathematics that UnfoldLab implements is formalized and machine-checked in
+The mathematics that Unmochan implements is formalized and machine-checked in
 Lean 4 (with Mathlib) under the optional local
 `lean-proofs/RequestProject/Unfolding/` bundle.  Every statement listed here is
 proved without `sorry`; `lean-proofs/RequestProject/Main.lean` imports all
@@ -11,7 +11,7 @@ This file is the dictionary between the Lean statements and the Python code.
 
 ## Conventions
 
-UnfoldLab stores lattice vectors as **rows** of a 3x3 array, so a supercell is
+Unmochan stores lattice vectors as **rows** of a 3x3 array, so a supercell is
 
 ```text
 A_sc = T @ A_pc            (T integral, det T != 0)
@@ -21,7 +21,7 @@ and fractional reciprocal coordinates transform as `K_sc = k_pc @ T.T`, i.e. as
 a *matrix–vector* product with `T` acting on the left of a column vector.  The
 Lean model uses the column convention `fold T k = T *ᵥ k`, which is the same
 map; `UnfoldLab.fold` is defined that way in `Basic.lean` and the docstring of
-`unfoldlab.core.plane_waves` records the correspondence.
+`unmochan.core.plane_waves` records the correspondence.
 
 Notation used below:
 
@@ -47,7 +47,7 @@ Notation used below:
 
 `PWMatches T k K G` is the predicate that decides which supercell plane waves
 contribute to the weight of `k`.  It is implemented by
-`unfoldlab.core.plane_waves.matching_g_mask`.
+`unmochan.core.plane_waves.matching_g_mask`.
 
 | Lean | Python | statement |
 | --- | --- | --- |
@@ -107,7 +107,7 @@ computes `U`, `V`, `D` and `U^{-1}` in exact Python integer arithmetic.
 ## Weights and the sum rule — `Unfolding/Weights.lean`
 
 `weight T k K Gs g c` models
-`unfoldlab.core.plane_waves.weights_from_coefficients`:
+`unmochan.core.plane_waves.weights_from_coefficients`:
 
 ```text
 w(k) = (Σ_{G matching k} |c_G|²) / (Σ_G |c_G|²)
@@ -123,7 +123,7 @@ w(k) = (Σ_{G matching k} |c_G|²) / (Σ_G |c_G|²)
 
 The sum rule is a statement about a *fiber at fixed band index*.  It is **not**
 the quantity `max_band_sum` reported by `diagnose_weights`, which sums over
-bands at one k-point and has no reason to equal one; see `docs/findings.md`.
+bands at one k-point and has no reason to equal one.
 
 The equality needs a complete fiber, which a band-structure path rarely
 samples.  The inequality does not, so an incomplete fiber whose weights already
@@ -134,7 +134,7 @@ exceed one is a violation the diagnostic can report on any path.
 A Γ-only calculation stores one member of every pair `{G, -G}` and reconstructs
 the rest by time reversal, `c_{-G} = conj(c_G)`.  `gammaExpand` and
 `gammaCoeff` model that reconstruction, which
-`unfoldlab.core.gamma.expand_gamma_half_basis` performs for both the VASP and
+`unmochan.core.gamma.expand_gamma_half_basis` performs for both the VASP and
 the QE reader.
 
 | Lean | Python | statement |
@@ -227,7 +227,7 @@ returning an uncertified value, so the result is exact rather than heuristic.
 ## Broadening — `Unfolding/Spectral.lean`
 
 `spectralFunction b w e E = Σ_j w_j · kernel(E - e_j)` models
-`unfoldlab.core.spectral.spectral_function`.
+`unmochan.core.spectral.spectral_function`.
 
 | Lean | Python | statement |
 | --- | --- | --- |
@@ -245,7 +245,7 @@ For a noncollinear (spinor) state each plane wave carries two coefficients, and
 `spinVec a b = (2 Re(ā b), 2 Im(ā b), ‖a‖² − ‖b‖²)` is its Bloch vector.  The
 unfolded texture `spinTexture` sums those vectors over the matching plane waves
 and normalizes by the norm of the state; it models
-`unfoldlab.core.plane_waves.spin_texture_from_coefficients`.
+`unmochan.core.plane_waves.spin_texture_from_coefficients`.
 
 | Lean | Python | statement |
 | --- | --- | --- |
@@ -275,8 +275,8 @@ readers therefore refuse to produce a texture in symmetry-reduced mode.
 
 ## Counterexamples — `Unfolding/Pitfalls.lean`
 
-Three negative results, each recording a bug that was found in the numerical
-code (see `docs/findings.md`).
+Three negative results record implementation pitfalls that the numerical code
+must continue to avoid.
 
 | Lean | Python | statement |
 | --- | --- | --- |
@@ -287,7 +287,7 @@ code (see `docs/findings.md`).
 ## Projected unfolding — `Unfolding/Projection.lean`
 
 `projectedWeight T k K Gs g c P p S = maskFraction P p S * weight T k K Gs g c`
-models `unfoldlab.workflows.projected`: the plane-wave weight times the fraction
+models `unmochan.workflows.projected`: the plane-wave weight times the fraction
 of the band's site/orbital character (`P` is the whole `(site, orbital)` table,
 `p` its entries, `S` the selection) that the selectors keep.
 
@@ -312,7 +312,7 @@ of a fiber.  That approximation is documented on the Python side.
 
 In the fractional (column) convention an integer matrix `M` is a symmetry of the
 lattice exactly when it preserves the metric tensor `G = A Aᵀ`, that is
-`Mᵀ G M = G` (`MetricPreserving`).  `unfoldlab.core.spacegroup` detects these by
+`Mᵀ G M = G` (`MetricPreserving`).  `unmochan.core.spacegroup` detects these by
 enumerating candidate columns in a finite box; the file proves that box is wide
 enough.
 
@@ -333,10 +333,10 @@ site-permutation check, which is a finite verification rather than a theorem.
 ## QE `xk`, `alat` and units — `Unfolding/Units.lean`
 
 A Quantum ESPRESSO wavefunction file records its k-point as `xk`: a *Cartesian*
-vector in units of `2π/alat`.  `unfoldlab.io.qe_wfc.fractional_kpoint_from_xk`
+vector in units of `2π/alat`.  `unmochan.io.qe_wfc.fractional_kpoint_from_xk`
 turns it into fractional reciprocal coordinates with QE's `at` matrix (the
 direct lattice in units of `alat`), and
-`unfoldlab.io.qe_xml.read_qe_xml` now reads `at` out of the calculation's own
+`unmochan.io.qe_xml.read_qe_xml` now reads `at` out of the calculation's own
 `data-file-schema.xml` instead of asking the user for it.
 
 | Lean | Python | statement |
@@ -354,7 +354,7 @@ unfolding weight is the squared norm of its discrete Fourier component,
 `A(k, a) = Σ_R exp(-2π i ⟪k, R⟫) c(a, R)`.  The sum rule is therefore a
 different theorem from the plane-wave one — it is discrete Fourier duality
 between the cell classes `ℤ³ / ℤ³ @ T` inside the supercell and the reciprocal
-classes `ℤ³ / T·ℤ³` that label the fiber.  `unfoldlab.core.tight_binding`
+classes `ℤ³ / T·ℤ³` that label the fiber.  `unmochan.core.tight_binding`
 implements it and `unmochan model unfold` exposes it on the command line.
 
 | Lean | Python | statement |
@@ -425,15 +425,15 @@ energies that carry it, never "exactly one eigenvector".
 A disordered supercell — an alloy snapshot, a special quasirandom structure, an
 ensemble of inequivalent defect placements — has no single band structure.  Each
 configuration is unfolded separately and the results are averaged with the
-probability of each configuration.  `unfoldlab.core.ensemble` implements the
-average and the `unfoldlab ensemble` command exposes it.
+probability of each configuration.  `unmochan.core.ensemble` implements the
+average and the `unmochan ensemble` command exposes it.
 
 | Lean | Python | statement |
 | --- | --- | --- |
 | `mixture` | `stack_configurations` | the configurational average `⟨A⟩ = Σ_i p_i A_i` |
 | `mixture_nonneg`, `mixture_le` | `ensemble_spectral_function` | the average is non-negative, and bounded by whatever bounds every configuration |
 | `integral_mixture_spectralFunction` | `stack_configurations` | **averaging conserves spectral weight**: the averaged map integrates to the average of the configurations' total weights |
-| `integral_mixture_spectralFunction_one` | `unfoldlab ensemble` | so with the unfolding sum rule holding configuration by configuration, it holds for the average |
+| `integral_mixture_spectralFunction_one` | `unmochan ensemble` | so with the unfolding sum rule holding configuration by configuration, it holds for the average |
 | `specCentre`, `specSpread` | `band_moments` | the centre and the squared width of a weighted spectrum at one k-point |
 | `sum_weighted_deviation`, `sum_weighted_sq_shift` | `band_moments` | a normalized spectrum has no first moment about its own centre (parallel-axis theorem) |
 | `ensembleSpread_decomposition` | `disorder_broadening` | **law of total variance**: the squared width of the averaged band is the average of the configurations' own squared widths plus the variance of their centres — the second term is the disorder broadening |
@@ -447,7 +447,7 @@ assume it but reports the residual of the identity through
 
 ## Energy windows and constant-energy cuts — `Unfolding/Windows.lean`
 
-`unfoldlab.core.windows` answers the questions that follow a heat map: what is
+`unmochan.core.windows` answers the questions that follow a heat map: what is
 `A(k, E₀)` along the path (the unfolded Fermi surface, or an ARPES-like cut),
 and how much unfolded weight lies between two energies (the occupied weight, or
 the weight a broadened plot leaks into a gap).  Both are evaluated in closed
@@ -473,8 +473,8 @@ and `spectralFunction_le` already bound it.
 A diagonalizer returns an arbitrary orthonormal basis of each eigenspace, so the
 unfolded weight of an *individual* band inside a degenerate multiplet is not a
 physical number: a unitary mixing of the multiplet redistributes it.  What is
-physical is the weight of the whole multiplet.  `unfoldlab.core.degeneracy`
-groups the bands by energy and reports it, and `unfoldlab degeneracy` exposes
+physical is the weight of the whole multiplet.  `unmochan.core.degeneracy`
+groups the bands by energy and reports it, and `unmochan degeneracy` exposes
 that from the command line.
 
 | Lean | Python | statement |
@@ -531,8 +531,8 @@ not depend on.
 The truncation bound is what makes the stored-norm diagnostic actionable: a PAW
 or ultrasoft run stores only the pseudo part of each state, and the shortfall of
 its norm below one is precisely the `δ` of the bound.
-`unfoldlab.io.vasp_wfc.state_norms_from_wavecar`,
-`unfoldlab.io.qe_wfc.state_norms_from_qe_save` and the `unfoldlab norms` command
+`unmochan.io.vasp_wfc.state_norms_from_wavecar`,
+`unmochan.io.qe_wfc.state_norms_from_qe_save` and the `unmochan norms` command
 measure it.
 
 ## Phonon masses and isotope defects — `Unfolding/Phonons.lean`
@@ -557,7 +557,7 @@ force-constant defect, never a mass defect.
 
 `supercell_site_masses` builds the `(|det T|, n_atoms)` mass table from
 `(cell, atom, mass)` substitutions, the JSON reader takes a `site_masses` block,
-and `unfoldlab phonon bands --site-mass cell,atom,mass` exposes it.  Because the
+and `unmochan phonon bands --site-mass cell,atom,mass` exposes it.  Because the
 congruence is real and diagonal, the eigenvectors stay orthonormal and both sum
 rules survive unchanged — which the tests check numerically.
 
@@ -767,7 +767,7 @@ cheap and defensible — and where it is undecidable.
 
 | Lean | Python | statement |
 | --- | --- | --- |
-| `matchCost` | `unfoldlab.core.tracking._align` | the total squared energy jump of a pairing of two peak lists |
+| `matchCost` | `unmochan.core.tracking._align` | the total squared energy jump of a pairing of two peak lists |
 | `monovary_of_monotone` | — | two increasing lists monovary, the hypothesis of the rearrangement inequality |
 | `matchCost_id_le` | `track_branches` | **sorting is the assignment algorithm**: for peak lists in increasing order the order-preserving pairing is optimal among *all* permutations, so no assignment problem has to be solved |
 | `matchCost_greedy_gt` | `tests/test_tracking.py` | the nearest-free-partner rule is strictly worse on an explicit pair of k-points — greedy tracking is not merely a different convention |
@@ -903,4 +903,4 @@ headline diagnostic cannot tell.
 | `augWeight` | `augmented_weights` | the augmentation-aware weight `(a + p) / (N + q)` |
 | `IsFiberRepr.sum_augWeight_eq_one` | `augmented_weights` | **the sum rule is blind to the error**: the true weights add to one over a fiber, and so do the pseudo weights |
 | `augWeight_sub_weight`, `augWeight_eq_weight_iff` | — | the exact discrepancy, and the condition for the pseudo weight to be right: the augmentation must be spread over the fiber in the same proportion as the plane-wave norm |
-| `abs_augWeight_sub_weight_le` | `weight_error_bound`, `diagnose_augmentation`, `unfoldlab norms` | **the error bound**: the pseudo weight is within `q / (N + q)` of the true one, and for an `S`-normalized state that is exactly the norm deficit the readers already report |
+| `abs_augWeight_sub_weight_le` | `weight_error_bound`, `diagnose_augmentation`, `unmochan norms` | **the error bound**: the pseudo weight is within `q / (N + q)` of the true one, and for an `S`-normalized state that is exactly the norm deficit the readers already report |

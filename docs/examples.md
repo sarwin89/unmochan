@@ -66,7 +66,7 @@ unmochan model bands --model examples/toy_1d_chain.json \
 
 The first run reproduces the primitive dispersion with weight one and leaves the
 two folded copies at weight zero, which is
-`UnfoldLab.tbWeight_blochState` in numerical form.  The second run puts a
+`tbWeight_blochState` in numerical form.  The second run puts a
 defect on one cell of the supercell and the delta peaks broaden into a genuine
 spectral function, while the total weight at each k-point is unchanged.
 
