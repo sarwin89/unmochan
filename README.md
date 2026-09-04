@@ -16,16 +16,14 @@ states, Fermi levels, spin textures and effective masses.
 
 | Path | Contents |
 | --- | --- |
-| `unmochan/` | public compatibility alias for new imports and `python -m unmochan.cli.main` |
-| `unfoldlab/core/` | the unfolding kernels: folding maps, plane-wave matching, weights and sum rules, spectral broadening, DOS, Fermi level, projections, tight binding, LCAO, phonons, symmetry, disorder ensembles |
-| `unfoldlab/io/` | readers and writers: VASP `WAVECAR` / `PROCAR` / `EIGENVAL`, Quantum ESPRESSO `.dat`, HDF5 and XML, Wannier90 `_hr.dat` / `_tb.dat`, JSON/HDF5 serialization, plotting |
-| `unfoldlab/twist/` | commensurate twist angles, moiré cells and stack diagnostics |
-| `unfoldlab/workflows/` | end-to-end problem definitions and backend drivers |
-| `unfoldlab/cli/` | implementation namespace for the `unmochan` command line; `unfoldlab` remains a legacy command alias |
-| `lean-proofs/RequestProject/` | optional local Lean 4 + Mathlib proof bundle, kept untracked |
-| `tests/` | the test suite, including synthetic VASP/QE fixtures |
-| `docs/` | review log, formal-model map, roadmap, benchmarks, progress tracker |
-| `examples/` | runnable toy models that need no DFT run |
+| `src/unmochan/core/` | unfolding kernels, physical data models, symmetry, spectral analysis, tight binding, LCAO, phonons, and disorder ensembles |
+| `src/unmochan/io/` | VASP, Quantum ESPRESSO, Wannier90, serialization, and plotting adapters |
+| `src/unmochan/twist/` | commensurate twist angles, moire cells, and stack diagnostics |
+| `src/unmochan/workflows/` | backend-neutral and backend-specific workflows |
+| `src/unmochan/cli/` | implementation of the `unmochan` command line |
+| `tests/` | synthetic and contract test suite |
+| `docs/` | architecture, theory, benchmarks, examples, testing, projections, and roadmap |
+| `examples/` | runnable toy models and benchmarks that need no DFT run |
 
 ## Installation
 
@@ -53,15 +51,14 @@ primitive k-point — band folding undone.  For the defect model the weight
 spreads across the fiber and the reported `sum_rules` confirm that it is
 conserved.  See `docs/examples.md` for the DFT-backed workflows.
 
-## Project Lineage
+## Project
 
-Unmochan is the active standalone project.  The historical `unfoldlab` import
-path and console command remain available for compatibility, but new work is
-developed and released under the Unmochan name.
+Unmochan is the active package and command name. The implementation is
+developed and distributed solely from `src/unmochan`.
 
-Thanks to [Ritam Chakraborty](https://github.com/ritamcha) for contributions to
-the project direction and implementation.  Thanks also to Prajwal Souza for the
-initial start to the codebase that made this work possible.
+Thanks to Ritam Chakraborty for contributions to the project direction and
+implementation, and to Prajwal Souza for the initial codebase from which the
+project developed.
 
 ## The formal model
 
@@ -83,12 +80,11 @@ governs.
 ## Development gates
 
 ```bash
-python -m pytest -q          # test suite
-ruff check .                 # lint
-mypy unfoldlab unmochan      # types
-cd lean-proofs && lake build # optional local formal model, if present
+python -m pytest --basetemp .tmp-pytest -p no:cacheprovider
+python -m ruff check .
+python -m mypy src/unmochan
+python -m compileall -q src/unmochan tests examples
 ```
 
-`docs/progress.md` records the state of every area and the backlog;
-`docs/findings.md` is the append-only log of what was wrong and how it was
-fixed.
+See `docs/architecture.md` for package boundaries, `docs/testing.md` for the
+verification policy, and `docs/roadmap.md` for open project work.
