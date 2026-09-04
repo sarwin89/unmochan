@@ -12,12 +12,12 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from unfoldlab.core.plane_waves import (
+from unmochan.core.plane_waves import (
     matching_g_mask,
     shared_weights_from_coefficients,
     weights_from_coefficients,
 )
-from unfoldlab.core.unfolding import (
+from unmochan.core.unfolding import (
     SharedWavefunctionGroup,
     compute_plane_wave_unfolding_weights,
     compute_plane_wave_unfolding_weights_shared,
@@ -290,11 +290,11 @@ def test_the_group_validates_its_own_shapes() -> None:
 
 
 def test_the_batched_kernel_is_exported_at_the_top_level() -> None:
-    import unfoldlab
+    import unmochan
 
-    assert unfoldlab.shared_weights_from_coefficients is shared_weights_from_coefficients
-    assert unfoldlab.SharedWavefunctionGroup is SharedWavefunctionGroup
+    assert unmochan.shared_weights_from_coefficients is shared_weights_from_coefficients
+    assert unmochan.SharedWavefunctionGroup is SharedWavefunctionGroup
     assert (
-        unfoldlab.compute_plane_wave_unfolding_weights_shared
+        unmochan.compute_plane_wave_unfolding_weights_shared
         is compute_plane_wave_unfolding_weights_shared
     )

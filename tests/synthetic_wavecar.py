@@ -6,7 +6,7 @@ from pathlib import Path
 
 import numpy as np
 
-from unfoldlab.io.vasp_wfc import generate_vasp_g_vectors
+from unmochan.io.vasp_wfc import generate_vasp_g_vectors
 
 
 def write_synthetic_wavecar(

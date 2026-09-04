@@ -15,13 +15,13 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from unfoldlab.core.plane_waves import matching_g_mask, weights_from_coefficients
-from unfoldlab.core.tight_binding import (
+from unmochan.core.plane_waves import matching_g_mask, weights_from_coefficients
+from unmochan.core.tight_binding import (
     TightBindingModel,
     unfold_tight_binding_model,
     unfold_tight_binding_path,
 )
-from unfoldlab.core.transformations import TransformationMatrix
+from unmochan.core.transformations import TransformationMatrix
 
 TOL = 1e-10
 

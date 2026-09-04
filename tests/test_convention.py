@@ -19,7 +19,7 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from unfoldlab.core.convention import (
+from unmochan.core.convention import (
     apply_cell_phase,
     apply_orbital_phase,
     cell_phase_factors,
@@ -29,9 +29,9 @@ from unfoldlab.core.convention import (
     gauge_overlap_kernel,
     orbital_phase_factors,
 )
-from unfoldlab.core.kpoints import fiber_kpoints
-from unfoldlab.core.lcao import lcao_weights, orthonormal_overlap_kernel
-from unfoldlab.core.tight_binding import (
+from unmochan.core.kpoints import fiber_kpoints
+from unmochan.core.lcao import lcao_weights, orthonormal_overlap_kernel
+from unmochan.core.tight_binding import (
     TightBindingModel,
     diagnose_tight_binding_weights,
     supercell_bloch_hamiltonian,
@@ -39,7 +39,7 @@ from unfoldlab.core.tight_binding import (
     tight_binding_orbital_weights,
     tight_binding_weights,
 )
-from unfoldlab.core.transformations import TransformationMatrix
+from unmochan.core.transformations import TransformationMatrix
 
 pytestmark = pytest.mark.unit
 

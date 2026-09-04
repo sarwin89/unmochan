@@ -1,6 +1,6 @@
 """Regression tests for the constructors and guards added while type-cleaning.
 
-The type annotations of the package are now checked (``mypy unfoldlab`` is
+The type annotations of the package are now checked (``mypy unmochan`` is
 clean), and making them honest changed a handful of runtime paths: new
 normalizing constructors, stricter argument validation in the CLI, and one
 genuine Python 3.10 incompatibility.  Each of those changes is pinned here so a
@@ -13,11 +13,11 @@ import numpy as np
 import pytest
 import typer
 
-from unfoldlab.cli.common import parse_broadening_kind, parse_code, parse_kpoint
-from unfoldlab.core.kpoints import KPoint, fiber_kpoint_mappings, fold_kpoints_to_supercell
-from unfoldlab.core.numerics import TransformLike  # noqa: F401  (public alias)
-from unfoldlab.core.tight_binding import tight_binding_orbital_weights
-from unfoldlab.core.transformations import TransformationMatrix
+from unmochan.cli.common import parse_broadening_kind, parse_code, parse_kpoint
+from unmochan.core.kpoints import KPoint, fiber_kpoint_mappings, fold_kpoints_to_supercell
+from unmochan.core.numerics import TransformLike  # noqa: F401  (public alias)
+from unmochan.core.tight_binding import tight_binding_orbital_weights
+from unmochan.core.transformations import TransformationMatrix
 
 
 def test_transformation_matrix_from_values_rounds_floats() -> None:
@@ -103,7 +103,7 @@ def test_parse_kpoint_produces_float_array() -> None:
 def test_serialization_timestamp_uses_stdlib_utc() -> None:
     """``datetime.UTC`` is 3.11+, but the package advertises ``>=3.10``."""
 
-    import unfoldlab.io.serialization as serialization
+    import unmochan.io.serialization as serialization
 
     assert not hasattr(serialization, "UTC")
     assert serialization.datetime.now(serialization.timezone.utc).tzinfo is not None

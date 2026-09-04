@@ -15,8 +15,8 @@ import numpy as np
 import pytest
 from typer.testing import CliRunner
 
-from unfoldlab.cli.common import parse_magmoms
-from unfoldlab.cli.main import app
+from unmochan.cli.common import parse_magmoms
+from unmochan.cli.main import app
 
 runner = CliRunner()
 

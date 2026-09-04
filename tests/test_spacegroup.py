@@ -4,16 +4,16 @@ import numpy as np
 import pytest
 from typer.testing import CliRunner
 
-from unfoldlab.cli.main import app
-from unfoldlab.core.spacegroup import (
+from unmochan.cli.main import app
+from unmochan.core.spacegroup import (
     detect_primitive_operations,
     lattice_point_group,
     metric_tensor,
     reciprocal_operation,
     space_group_operations,
 )
-from unfoldlab.core.structures import Structure
-from unfoldlab.core.symmetry import map_kpoints_to_stored, supercell_operation
+from unmochan.core.structures import Structure
+from unmochan.core.symmetry import map_kpoints_to_stored, supercell_operation
 
 runner = CliRunner()
 

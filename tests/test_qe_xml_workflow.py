@@ -9,8 +9,8 @@ import pytest
 
 from tests.synthetic_qe_xml import write_data_file_schema
 from tests.test_qe_wfc_kpoints import COEFFS, MILLER, write_synthetic_wfc_dat
-from unfoldlab.io.qe_xml import HARTREE_EV, eigenvalues_for_spin, read_qe_xml
-from unfoldlab.workflows.backend import compute_backend_weights, unfold_backend_bands
+from unmochan.io.qe_xml import HARTREE_EV, eigenvalues_for_spin, read_qe_xml
+from unmochan.workflows.backend import compute_backend_weights, unfold_backend_bands
 
 TRANSFORM = np.diag([2.0, 1.0, 1.0])
 EIGENVALUES_HA = np.array([[-0.2, 0.1]])
@@ -110,7 +110,7 @@ def test_a_spin_channel_must_be_chosen_for_lsda(tmp_path: Path):
 def test_unfold_cli_needs_neither_bands_nor_lattice_alat(tmp_path: Path):
     from typer.testing import CliRunner
 
-    from unfoldlab.cli.main import app
+    from unmochan.cli.main import app
 
     kmap = _kmap(tmp_path)
     save_dir = _save(tmp_path)

@@ -7,7 +7,7 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-from unfoldlab.io.wannier90 import read_wannier90_hr
+from unmochan.io.wannier90 import read_wannier90_hr
 
 
 def _hr_text(
@@ -137,8 +137,8 @@ def test_rejects_malformed_files(tmp_path: Path) -> None:
 def test_a_wannier_file_unfolds_like_the_json_model(tmp_path: Path) -> None:
     """A perfect chain read from hr data unfolds to the primitive dispersion."""
 
-    from unfoldlab.core.tight_binding import unfold_tight_binding_model
-    from unfoldlab.core.transformations import TransformationMatrix
+    from unmochan.core.tight_binding import unfold_tight_binding_model
+    from unmochan.core.transformations import TransformationMatrix
 
     model = read_wannier90_hr(_chain(tmp_path))
     transform = TransformationMatrix(np.diag([3.0, 1.0, 1.0]))

@@ -15,9 +15,9 @@ import numpy as np
 import pytest
 from typer.testing import CliRunner
 
-from unfoldlab.cli.main import app
-from unfoldlab.core.numerics import integer_det3
-from unfoldlab.twist.commensurate import (
+from unmochan.cli.main import app
+from unmochan.core.numerics import integer_det3
+from unmochan.twist.commensurate import (
     commensurate_stack_transforms,
     diagnose_stack,
     hexagonal_commensurate_twists,

@@ -5,10 +5,12 @@ import numpy as np
 import pytest
 from typer.testing import CliRunner
 
-from unfoldlab.cli.main import app
-from unfoldlab.core.spectral import EffectiveBandStructure
-from unfoldlab.io.serialization import (
+from unmochan.cli.main import app
+from unmochan.core.spectral import EffectiveBandStructure
+from unmochan.io.serialization import (
+    EBS_SCHEMA,
     EBS_SCHEMA_VERSION,
+    RUN_MANIFEST_SCHEMA,
     build_run_manifest,
     read_ebs,
     read_ebs_hdf5,
@@ -111,11 +113,19 @@ def test_manifest_round_trip(tmp_path: Path):
     assert read_run_manifest(path) == manifest
 
 
+def test_package_rename_preserves_version_one_schema_identifiers():
+    manifest = build_run_manifest(code="vasp", weight_mode="plane-wave projection")
+
+    assert EBS_SCHEMA == "unfoldlab.effective_band_structure"
+    assert RUN_MANIFEST_SCHEMA == "unfoldlab.run_manifest"
+    assert manifest.to_dict()["schema"] == RUN_MANIFEST_SCHEMA
+
+
 def test_read_ebs_json_rejects_a_foreign_document(tmp_path: Path):
     path = tmp_path / "other.json"
     path.write_text(json.dumps({"schema": "something.else"}))
 
-    with pytest.raises(ValueError, match="not an unfoldlab effective band structure"):
+    with pytest.raises(ValueError, match="not an unmochan effective band structure"):
         read_ebs_json(path)
 
 
@@ -262,5 +272,5 @@ def test_read_ebs_hdf5_rejects_a_foreign_file(tmp_path: Path):
     path = tmp_path / "other.h5"
     with h5py.File(path, "w") as handle:
         handle.create_dataset("energies", data=np.zeros(3))
-    with pytest.raises(ValueError, match="not an unfoldlab effective band structure"):
+    with pytest.raises(ValueError, match="not an unmochan effective band structure"):
         read_ebs_hdf5(path)

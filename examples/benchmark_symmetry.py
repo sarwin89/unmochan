@@ -17,7 +17,7 @@ import time
 
 import numpy as np
 
-from unfoldlab.core.spacegroup import (
+from unmochan.core.spacegroup import (
     _candidate_translations,
     _label_codes,
     _reduce,
@@ -26,7 +26,7 @@ from unfoldlab.core.spacegroup import (
     site_labels,
     space_group_operations,
 )
-from unfoldlab.core.structures import Structure
+from unmochan.core.structures import Structure
 
 
 def cubic_supercell(n: int, rattle: float = 0.0) -> Structure:

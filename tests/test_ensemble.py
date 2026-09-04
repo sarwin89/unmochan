@@ -7,16 +7,16 @@ import json
 import numpy as np
 import pytest
 
-from unfoldlab.cli.main import main
-from unfoldlab.core.ensemble import (
+from unmochan.cli.main import main
+from unmochan.core.ensemble import (
     band_moments,
     configuration_weights,
     disorder_broadening,
     ensemble_spectral_function,
     stack_configurations,
 )
-from unfoldlab.core.spectral import EffectiveBandStructure
-from unfoldlab.io.serialization import write_ebs
+from unmochan.core.spectral import EffectiveBandStructure
+from unmochan.io.serialization import write_ebs
 
 
 def _ebs(energies, weights=None, *, reference: float = 0.0) -> EffectiveBandStructure:

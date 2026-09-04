@@ -16,8 +16,8 @@ import numpy as np
 import pytest
 from typer.testing import CliRunner
 
-from unfoldlab.cli.main import app
-from unfoldlab.core.fermi import (
+from unmochan.cli.main import app
+from unmochan.core.fermi import (
     align_reference,
     electron_count,
     electrons_per_primitive_cell,
@@ -26,8 +26,8 @@ from unfoldlab.core.fermi import (
     state_occupations,
     total_weight,
 )
-from unfoldlab.core.spectral import EffectiveBandStructure
-from unfoldlab.io.serialization import write_ebs
+from unmochan.core.spectral import EffectiveBandStructure
+from unmochan.io.serialization import write_ebs
 
 
 def two_band_structure(gap: float = 4.0, n_kpoints: int = 8) -> EffectiveBandStructure:

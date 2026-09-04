@@ -1,6 +1,6 @@
 """The command surface of the CLI, pinned against refactoring.
 
-`unfoldlab/cli/main.py` used to be one 1766-line module holding the Typer app,
+`unmochan/cli/main.py` used to be one 1766-line module holding the Typer app,
 every command body, the guided menu and the argument parsers.  It is now split
 into `app`, `commands`, `backends`, `guided` and `common`.  A split like that
 can silently drop a command -- a body that is never imported is never
@@ -15,7 +15,7 @@ from pathlib import Path
 import pytest
 import typer
 
-from unfoldlab.cli.main import app, main
+from unmochan.cli.main import app, main
 
 TOP_LEVEL_COMMANDS = {
     "guide",
@@ -80,17 +80,17 @@ def test_backend_groups_are_all_registered(group_name: str) -> None:
 @pytest.mark.parametrize(
     "module_name",
     [
-        "unfoldlab.cli.analysis",
-        "unfoldlab.cli.app",
-        "unfoldlab.cli.backends",
-        "unfoldlab.cli.commands",
-        "unfoldlab.cli.diagnostics",
-        "unfoldlab.cli.common",
-        "unfoldlab.cli.guided",
-        "unfoldlab.cli.main",
-        "unfoldlab.cli.model",
-        "unfoldlab.cli.phonon",
-        "unfoldlab.cli.symmetry",
+        "unmochan.cli.analysis",
+        "unmochan.cli.app",
+        "unmochan.cli.backends",
+        "unmochan.cli.commands",
+        "unmochan.cli.diagnostics",
+        "unmochan.cli.common",
+        "unmochan.cli.guided",
+        "unmochan.cli.main",
+        "unmochan.cli.model",
+        "unmochan.cli.phonon",
+        "unmochan.cli.symmetry",
     ],
 )
 def test_cli_modules_import_standalone(module_name: str) -> None:
@@ -107,9 +107,9 @@ def test_cli_modules_import_standalone(module_name: str) -> None:
 def test_no_cli_module_exceeds_the_length_limit() -> None:
     """No CLI module is back over 1000 lines."""
 
-    import unfoldlab.cli
+    import unmochan.cli
 
-    package_dir = Path(next(iter(unfoldlab.cli.__path__)))
+    package_dir = Path(next(iter(unmochan.cli.__path__)))
     lengths = {
         path.name: len(path.read_text().splitlines()) for path in sorted(package_dir.glob("*.py"))
     }

@@ -5,8 +5,8 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from unfoldlab.core.kpoints import fiber_kpoints
-from unfoldlab.core.tight_binding import (
+from unmochan.core.kpoints import fiber_kpoints
+from unmochan.core.tight_binding import (
     TightBindingModel,
     diagnose_tight_binding_weights,
     supercell_bloch_hamiltonian,
@@ -17,7 +17,7 @@ from unfoldlab.core.tight_binding import (
     unfold_tight_binding_path,
     validate_supercell_cells,
 )
-from unfoldlab.core.transformations import TransformationMatrix
+from unmochan.core.transformations import TransformationMatrix
 
 MATRICES = [
     np.diag([1, 1, 1]),

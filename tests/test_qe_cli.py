@@ -2,7 +2,7 @@ from pathlib import Path
 
 from typer.testing import CliRunner
 
-from unfoldlab.cli.main import app, main
+from unmochan.cli.main import app, main
 
 runner = CliRunner()
 
@@ -41,11 +41,11 @@ def test_guide_command_has_workflow_options_only():
 
 
 def test_main_reports_bad_command_without_traceback(capsys):
-    exit_code = main(["unfoldlab"])
+    exit_code = main(["unmochan"])
     captured = capsys.readouterr()
 
     assert exit_code == 2
-    assert "No such command 'unfoldlab'" in captured.err
+    assert "No such command 'unmochan'" in captured.err
     assert "Traceback" not in captured.err
 
 

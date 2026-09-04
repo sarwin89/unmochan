@@ -10,11 +10,11 @@ from synthetic_procar import write_synthetic_procar
 from synthetic_wavecar import write_synthetic_wavecar
 from typer.testing import CliRunner
 
-from unfoldlab.cli.main import app, main
-from unfoldlab.io.vasp import write_vasp_path_files
-from unfoldlab.io.vasp_wfc import generate_vasp_g_vectors
-from unfoldlab.workflows.backend import unfold_backend_bands
-from unfoldlab.workflows.vasp import build_vasp_effective_band_structure
+from unmochan.cli.main import app, main
+from unmochan.io.vasp import write_vasp_path_files
+from unmochan.io.vasp_wfc import generate_vasp_g_vectors
+from unmochan.workflows.backend import unfold_backend_bands
+from unmochan.workflows.vasp import build_vasp_effective_band_structure
 
 runner = CliRunner()
 

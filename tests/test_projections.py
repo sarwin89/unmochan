@@ -1,6 +1,6 @@
 import pytest
 
-from unfoldlab.core.projections import (
+from unmochan.core.projections import (
     ProjectionGroup,
     ProjectionSelector,
     parse_projection_selectors,

@@ -6,7 +6,7 @@ import numpy as np
 import pytest
 
 from tests.synthetic_qe_xml import write_data_file_schema
-from unfoldlab.io.qe_xml import (
+from unmochan.io.qe_xml import (
     BOHR_ANGSTROM,
     HARTREE_EV,
     QEXMLError,

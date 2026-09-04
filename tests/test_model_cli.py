@@ -9,8 +9,9 @@ import numpy as np
 import pytest
 from typer.testing import CliRunner
 
-from unfoldlab.cli.main import app
-from unfoldlab.io.model_hamiltonian import read_tight_binding_model
+from unmochan.cli.main import app
+from unmochan.io.model_hamiltonian import read_tight_binding_model
+from unmochan.io.serialization import EBS_SCHEMA
 
 runner = CliRunner()
 
@@ -77,7 +78,7 @@ def test_model_unfold_cli_writes_an_ebs_json(tmp_path: Path) -> None:
     assert result.exit_code == 0, result.output
     assert output.exists()
     stored = json.loads(output.read_text())
-    assert stored["schema"] == "unfoldlab.effective_band_structure"
+    assert stored["schema"] == EBS_SCHEMA
     assert len(stored["kpoints"]) == 2
 
 
@@ -464,7 +465,7 @@ LCAO_CHAIN = {
 
 
 def test_overlaps_block_is_optional_and_hermitized(tmp_path: Path) -> None:
-    from unfoldlab.io.model_hamiltonian import read_overlap_model
+    from unmochan.io.model_hamiltonian import read_overlap_model
 
     assert read_overlap_model(_write(tmp_path, CHAIN)) is None
     overlap = read_overlap_model(_write(tmp_path, LCAO_CHAIN))
@@ -474,7 +475,7 @@ def test_overlaps_block_is_optional_and_hermitized(tmp_path: Path) -> None:
 
 
 def test_overlaps_block_requires_the_on_site_cell(tmp_path: Path) -> None:
-    from unfoldlab.io.model_hamiltonian import read_overlap_model
+    from unmochan.io.model_hamiltonian import read_overlap_model
 
     broken = {**LCAO_CHAIN, "overlaps": [{"cell": [1, 0, 0], "matrix": [[0.25]]}]}
     with pytest.raises(ValueError, match=r"\[0, 0, 0\]"):

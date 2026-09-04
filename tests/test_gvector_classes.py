@@ -15,8 +15,8 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from unfoldlab.core import plane_waves
-from unfoldlab.core.plane_waves import (
+from unmochan.core import plane_waves
+from unmochan.core.plane_waves import (
     compute_weights_from_coefficient_table,
     matching_g_mask,
     shared_weights_from_coefficients,

@@ -15,7 +15,7 @@ from __future__ import annotations
 
 import numpy as np
 
-from unfoldlab.core.spacegroup import (
+from unmochan.core.spacegroup import (
     _assignment_holds,
     _candidate_translations,
     _feasible_partners,
@@ -27,7 +27,7 @@ from unfoldlab.core.spacegroup import (
     site_labels,
     space_group_operations,
 )
-from unfoldlab.core.structures import Structure
+from unmochan.core.structures import Structure
 
 INVERSION = -np.eye(3, dtype=np.int64)
 IDENTITY = np.eye(3, dtype=np.int64)

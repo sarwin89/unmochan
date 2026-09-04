@@ -7,8 +7,8 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-from unfoldlab.core.site_projection import detect_layers
-from unfoldlab.io.wannier90 import read_wannier90_tb
+from unmochan.core.site_projection import detect_layers
+from unmochan.io.wannier90 import read_wannier90_tb
 
 
 def _tb_text(

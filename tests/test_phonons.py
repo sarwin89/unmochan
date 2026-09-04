@@ -9,15 +9,15 @@ import numpy as np
 import pytest
 from typer.testing import CliRunner
 
-from unfoldlab.cli.main import app
-from unfoldlab.core.phonons import (
+from unmochan.cli.main import app
+from unmochan.core.phonons import (
     ForceConstantModel,
     eigenvalues_to_frequencies,
     unfold_phonon_fiber,
     unfold_phonon_path,
 )
-from unfoldlab.core.transformations import TransformationMatrix
-from unfoldlab.io.force_constants import read_force_constant_model
+from unmochan.core.transformations import TransformationMatrix
+from unmochan.io.force_constants import read_force_constant_model
 
 runner = CliRunner()
 

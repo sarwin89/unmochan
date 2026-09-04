@@ -11,7 +11,7 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from unfoldlab.core.tight_binding import (
+from unmochan.core.tight_binding import (
     TightBindingModel,
     supercell_cells,
     tight_binding_orbital_weights,
@@ -20,7 +20,7 @@ from unfoldlab.core.tight_binding import (
     unfold_tight_binding_path,
     unfold_tight_binding_path_projected,
 )
-from unfoldlab.core.transformations import TransformationMatrix
+from unmochan.core.transformations import TransformationMatrix
 
 
 def _transform() -> TransformationMatrix:

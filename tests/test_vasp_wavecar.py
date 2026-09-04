@@ -3,10 +3,10 @@ from pathlib import Path
 import numpy as np
 from typer.testing import CliRunner
 
-from unfoldlab.cli.main import app
-from unfoldlab.io.qe import read_kmap
-from unfoldlab.io.vasp import write_vasp_path_files
-from unfoldlab.io.vasp_wfc import (
+from unmochan.cli.main import app
+from unmochan.io.qe import read_kmap
+from unmochan.io.vasp import write_vasp_path_files
+from unmochan.io.vasp_wfc import (
     WavecarReader,
     compute_weights_from_wavecar,
     generate_vasp_g_vectors,

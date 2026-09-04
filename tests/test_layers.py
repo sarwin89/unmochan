@@ -15,8 +15,8 @@ import pytest
 from synthetic_wavecar import write_synthetic_wavecar
 from typer.testing import CliRunner
 
-from unfoldlab.cli.main import app
-from unfoldlab.core.layers import (
+from unmochan.cli.main import app
+from unmochan.core.layers import (
     density_fourier_coefficients,
     diagnose_layer_conservation,
     layer_charges,
@@ -24,9 +24,9 @@ from unfoldlab.core.layers import (
     layer_resolved_weights,
     planar_average_density,
 )
-from unfoldlab.core.plane_waves import weights_from_coefficients
-from unfoldlab.core.structures import Structure
-from unfoldlab.io.vasp_wfc import generate_vasp_g_vectors
+from unmochan.core.plane_waves import weights_from_coefficients
+from unmochan.core.structures import Structure
+from unmochan.io.vasp_wfc import generate_vasp_g_vectors
 
 runner = CliRunner()
 

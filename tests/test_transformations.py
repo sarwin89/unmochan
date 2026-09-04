@@ -1,9 +1,9 @@
 import numpy as np
 import pytest
 
-from unfoldlab.core.kpoints import KPoint, fold_kpoint_to_supercell
-from unfoldlab.core.structures import Structure
-from unfoldlab.core.transformations import detect_transformation
+from unmochan.core.kpoints import KPoint, fold_kpoint_to_supercell
+from unmochan.core.structures import Structure
+from unmochan.core.transformations import detect_transformation
 
 
 def test_detects_diagonal_supercell_transform():
