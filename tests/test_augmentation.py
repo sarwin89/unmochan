@@ -236,8 +236,8 @@ def test_the_report_needs_a_state() -> None:
         diagnose_augmentation(np.zeros((0, 3)))
 
 
-def test_the_module_is_exported() -> None:
-    import unmochan
+def test_the_module_is_exported_from_core() -> None:
+    import unmochan.core as core
 
-    assert unmochan.diagnose_augmentation is diagnose_augmentation
-    assert unmochan.augmented_weights is augmented_weights
+    assert core.diagnose_augmentation is diagnose_augmentation
+    assert core.augmented_weights is augmented_weights

@@ -7,7 +7,8 @@ import json
 import numpy as np
 import pytest
 
-from unmochan import (
+from unmochan.cli.main import main
+from unmochan.core.degeneracy import (
     DegeneracyReport,
     average_degenerate_weights,
     degeneracy_averaged_weights,
@@ -15,7 +16,6 @@ from unmochan import (
     group_degenerate_bands,
     subspace_weights,
 )
-from unmochan.cli.main import main
 from unmochan.core.plane_waves import weights_from_coefficients
 from unmochan.core.spectral import EffectiveBandStructure
 from unmochan.io.serialization import read_ebs, write_ebs
