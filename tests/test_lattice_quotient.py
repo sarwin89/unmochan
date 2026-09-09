@@ -5,16 +5,16 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from unfoldlab.core.kpoints import (
+from unmochan.core.kpoints import (
     KPoint,
     fiber_kpoint_mappings,
     fiber_kpoints,
     fold_kpoint_to_supercell,
 )
-from unfoldlab.core.lattice_quotient import coset_representatives, smith_normal_form
-from unfoldlab.core.numerics import wrap_fractional
-from unfoldlab.core.plane_waves import weights_from_coefficients
-from unfoldlab.core.transformations import TransformationMatrix
+from unmochan.core.lattice_quotient import coset_representatives, smith_normal_form
+from unmochan.core.numerics import wrap_fractional
+from unmochan.core.plane_waves import weights_from_coefficients
+from unmochan.core.transformations import TransformationMatrix
 
 MATRICES = [
     np.diag([1, 1, 1]),
@@ -188,8 +188,8 @@ def test_random_transforms_give_complete_fibers() -> None:
 def test_fiber_cli_lists_the_fiber_and_writes_a_kmap(tmp_path, capsys) -> None:
     import json as _json
 
-    from unfoldlab.cli.main import main
-    from unfoldlab.io.qe import read_kmap
+    from unmochan.cli.main import main
+    from unmochan.io.qe import read_kmap
 
     out = tmp_path / "fiber.kmap"
     code = main(
@@ -215,6 +215,6 @@ def test_fiber_cli_lists_the_fiber_and_writes_a_kmap(tmp_path, capsys) -> None:
 
 
 def test_fiber_cli_requires_a_transform(tmp_path) -> None:
-    from unfoldlab.cli.main import main
+    from unmochan.cli.main import main
 
     assert main(["fiber", "--kpoint", "0,0,0"]) != 0

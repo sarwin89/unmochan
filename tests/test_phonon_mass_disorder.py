@@ -17,8 +17,8 @@ import numpy as np
 import pytest
 from typer.testing import CliRunner
 
-from unfoldlab.cli.main import app
-from unfoldlab.core.phonons import (
+from unmochan.cli.main import app
+from unmochan.core.phonons import (
     ForceConstantModel,
     mass_site_scaling,
     supercell_dynamical_matrix,
@@ -26,9 +26,9 @@ from unfoldlab.core.phonons import (
     unfold_phonon_fiber,
     unfold_phonon_path,
 )
-from unfoldlab.core.tight_binding import supercell_bloch_hamiltonian
-from unfoldlab.core.transformations import TransformationMatrix
-from unfoldlab.io.force_constants import read_force_constant_problem
+from unmochan.core.tight_binding import supercell_bloch_hamiltonian
+from unmochan.core.transformations import TransformationMatrix
+from unmochan.io.force_constants import read_force_constant_problem
 
 runner = CliRunner()
 

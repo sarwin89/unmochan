@@ -15,11 +15,11 @@ import pytest
 from synthetic_qe_xml import write_data_file_schema
 from test_qe_wfc_kpoints import COEFFS, MILLER, write_synthetic_wfc_dat
 
-from unfoldlab.core.kpoints import KPoint
-from unfoldlab.core.structures import Structure
-from unfoldlab.io.qe_xml import HARTREE_EV
-from unfoldlab.twist.problem import TwistedUnfoldingProblem
-from unfoldlab.workflows.problem import (
+from unmochan.core.kpoints import KPoint
+from unmochan.core.structures import Structure
+from unmochan.io.qe_xml import HARTREE_EV
+from unmochan.twist.problem import TwistedUnfoldingProblem
+from unmochan.workflows.problem import (
     UnfoldingProblem,
     unfold_qe_save_to_lattice,
     unfold_supercell_to_lattice,

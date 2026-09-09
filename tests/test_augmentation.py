@@ -1,6 +1,6 @@
 """PAW / ultrasoft augmentation: the error the plane-wave weight cannot see.
 
-`unfoldlab.core.augmentation` states, in numbers, the caveat every plane-wave
+`unmochan.core.augmentation` states, in numbers, the caveat every plane-wave
 unfolding of a PAW or ultrasoft calculation carries: the stored coefficients are
 the pseudo wavefunction, so the weights are the pseudo weights.  The statements
 it implements are proved in ``RequestProject/Unfolding/Augmentation.lean``, and
@@ -23,7 +23,7 @@ import json
 import numpy as np
 import pytest
 
-from unfoldlab.core.augmentation import (
+from unmochan.core.augmentation import (
     NEGLIGIBLE_FRACTION,
     SEVERE_FRACTION,
     augmentation_fraction,
@@ -33,7 +33,7 @@ from unfoldlab.core.augmentation import (
     structure_factor,
     weight_error_bound,
 )
-from unfoldlab.core.plane_waves import matching_g_mask
+from unmochan.core.plane_waves import matching_g_mask
 
 TRANSFORM = np.diag([2, 1, 1])
 
@@ -236,8 +236,8 @@ def test_the_report_needs_a_state() -> None:
         diagnose_augmentation(np.zeros((0, 3)))
 
 
-def test_the_module_is_exported() -> None:
-    import unfoldlab
+def test_the_module_is_exported_from_core() -> None:
+    import unmochan.core as core
 
-    assert unfoldlab.diagnose_augmentation is diagnose_augmentation
-    assert unfoldlab.augmented_weights is augmented_weights
+    assert core.diagnose_augmentation is diagnose_augmentation
+    assert core.augmented_weights is augmented_weights

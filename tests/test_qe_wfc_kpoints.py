@@ -14,7 +14,7 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-from unfoldlab.io.qe_wfc import (
+from unmochan.io.qe_wfc import (
     compute_weights_from_qe_save,
     fractional_kpoint_from_xk,
     parse_binary_header,
@@ -200,7 +200,7 @@ GAMMA_HALF = np.array([[0, 0, 0], [1, 0, 0], [2, 0, 0]])
 def test_gamma_only_dat_is_expanded_and_satisfies_the_sum_rule(tmp_path: Path):
     """A gamma-only file stores half the basis; unfolding must expand it."""
 
-    from unfoldlab.io.qe_wfc import read_wfc_dat
+    from unmochan.io.qe_wfc import read_wfc_dat
 
     save_dir = tmp_path / "qe.save"
     save_dir.mkdir()

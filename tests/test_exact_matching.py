@@ -16,19 +16,19 @@ import itertools
 import numpy as np
 import pytest
 
-from unfoldlab.core.numerics import (
+from unmochan.core.numerics import (
     check_atol,
     integer_adjugate3,
     integer_det3,
     wrap_fractional,
 )
-from unfoldlab.core.plane_waves import matching_g_mask, weights_from_coefficients
-from unfoldlab.core.structures import Structure
-from unfoldlab.core.transformations import (
+from unmochan.core.plane_waves import matching_g_mask, weights_from_coefficients
+from unmochan.core.structures import Structure
+from unmochan.core.transformations import (
     TransformationMatrix,
     check_supercell_consistency,
 )
-from unfoldlab.core.unfolding import (
+from unmochan.core.unfolding import (
     PlaneWaveKPointData,
     compute_plane_wave_unfolding_weights,
     diagnose_fiber_sum_rule,

@@ -35,11 +35,10 @@ dev = [
 ]
 
 [project.scripts]
-unmochan = "unfoldlab.cli.main:main"
-unfoldlab = "unfoldlab.cli.main:unfoldlab_main"
+unmochan = "unmochan.cli.main:main"
 
 [tool.hatch.build.targets.wheel]
-packages = ["unfoldlab", "unmochan"]
+packages = ["src/unmochan"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

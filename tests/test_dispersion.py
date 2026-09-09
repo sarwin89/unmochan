@@ -12,8 +12,8 @@ import numpy as np
 import pytest
 from typer.testing import CliRunner
 
-from unfoldlab.cli.main import app
-from unfoldlab.core.dispersion import (
+from unmochan.cli.main import app
+from unmochan.core.dispersion import (
     HBAR_SQ_OVER_ME,
     band_extremum,
     effective_mass,
@@ -23,8 +23,8 @@ from unfoldlab.core.dispersion import (
     spectral_peaks,
     unresolvable_pairs,
 )
-from unfoldlab.core.spectral import EffectiveBandStructure
-from unfoldlab.io.serialization import write_ebs
+from unmochan.core.spectral import EffectiveBandStructure
+from unmochan.io.serialization import write_ebs
 
 runner = CliRunner()
 

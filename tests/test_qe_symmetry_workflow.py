@@ -16,9 +16,9 @@ import pytest
 from test_qe_wfc_kpoints import write_synthetic_wfc_dat
 from typer.testing import CliRunner
 
-from unfoldlab.cli.main import app
-from unfoldlab.io.qe import write_qe_path_files
-from unfoldlab.workflows.backend import compute_backend_weights
+from unmochan.cli.main import app
+from unmochan.io.qe import write_qe_path_files
+from unmochan.workflows.backend import compute_backend_weights
 
 runner = CliRunner()
 

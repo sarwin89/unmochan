@@ -7,14 +7,14 @@ import math
 import numpy as np
 import pytest
 
-from unfoldlab.cli.main import main
-from unfoldlab.core.spectral import EffectiveBandStructure
-from unfoldlab.core.windows import (
+from unmochan.cli.main import main
+from unmochan.core.spectral import EffectiveBandStructure
+from unmochan.core.windows import (
     band_filling,
     constant_energy_cut,
     energy_window_weight,
 )
-from unfoldlab.io.serialization import write_ebs
+from unmochan.io.serialization import write_ebs
 
 
 def _ebs(energies, weights=None, *, reference: float = 0.0) -> EffectiveBandStructure:

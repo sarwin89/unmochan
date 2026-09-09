@@ -1,6 +1,6 @@
 """Shadow bands from a weak superlattice perturbation.
 
-The closed forms in ``unfoldlab.core.perturbation`` are checked against a dense
+The closed forms in ``unmochan.core.perturbation`` are checked against a dense
 diagonalization of the same 2x2 Hamiltonian, against the bounds proved in
 ``RequestProject/Unfolding/Perturbation.lean``, and end to end: a model
 structure built by :func:`shadow_band_structure` is handed back to
@@ -15,7 +15,7 @@ import json
 import numpy as np
 import pytest
 
-from unfoldlab.core.perturbation import (
+from unmochan.core.perturbation import (
     coupling_from_peaks,
     diagnose_shadow_bands,
     shadow_band_structure,
@@ -23,7 +23,7 @@ from unfoldlab.core.perturbation import (
     two_level_hamiltonian,
     two_level_solution,
 )
-from unfoldlab.core.spectral import EffectiveBandStructure
+from unmochan.core.spectral import EffectiveBandStructure
 
 
 def _reference_solution(mean: float, detuning: float, coupling: complex):
@@ -247,8 +247,8 @@ def test_diagnosis_serializes() -> None:
 def test_cli_shadow_reports_and_writes(tmp_path) -> None:  # type: ignore[no-untyped-def]
     from typer.testing import CliRunner
 
-    from unfoldlab.cli.main import app
-    from unfoldlab.io.serialization import write_ebs
+    from unmochan.cli.main import app
+    from unmochan.io.serialization import write_ebs
 
     run_path = tmp_path / "run.json"
     json_path = tmp_path / "shadow.json"
@@ -266,8 +266,8 @@ def test_cli_shadow_reports_and_writes(tmp_path) -> None:  # type: ignore[no-unt
 def test_cli_shadow_says_so_when_the_two_level_picture_fails(tmp_path) -> None:  # type: ignore[no-untyped-def]
     from typer.testing import CliRunner
 
-    from unfoldlab.cli.main import app
-    from unfoldlab.io.serialization import write_ebs
+    from unmochan.cli.main import app
+    from unmochan.io.serialization import write_ebs
 
     structure = _model_structure(0.2)
     energies = np.concatenate([structure.energies, np.full((structure.n_kpoints, 1), 6.0)], axis=1)

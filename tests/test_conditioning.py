@@ -13,8 +13,8 @@ import numpy as np
 import pytest
 from typer.testing import CliRunner
 
-from unfoldlab.cli.main import app
-from unfoldlab.core.conditioning import (
+from unmochan.cli.main import app
+from unmochan.core.conditioning import (
     DEFAULT_OVERLAP_THRESHOLD,
     canonical_orthogonalization,
     diagnose_overlap_conditioning,
@@ -22,7 +22,7 @@ from unfoldlab.core.conditioning import (
     hermitian_part,
     solve_generalized_eigenproblem_truncated,
 )
-from unfoldlab.core.lcao import solve_generalized_eigenproblem
+from unmochan.core.lcao import solve_generalized_eigenproblem
 
 
 def chain_overlap(n: int, off: float) -> np.ndarray:

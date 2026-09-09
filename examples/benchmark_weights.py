@@ -27,13 +27,13 @@ from collections.abc import Callable
 
 import numpy as np
 
-from unfoldlab.core.kpoints import fiber_kpoints
-from unfoldlab.core.plane_waves import (
+from unmochan.core.kpoints import fiber_kpoints
+from unmochan.core.plane_waves import (
     matching_g_mask,
     shared_weights_from_coefficients,
     weights_from_coefficients,
 )
-from unfoldlab.core.transformations import TransformationMatrix
+from unmochan.core.transformations import TransformationMatrix
 
 TRANSFORM = TransformationMatrix.from_values(np.diag([4, 4, 4]))
 N_BANDS = 60

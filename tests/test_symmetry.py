@@ -11,8 +11,8 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from unfoldlab.core.plane_waves import weights_from_coefficients
-from unfoldlab.core.symmetry import (
+from unmochan.core.plane_waves import weights_from_coefficients
+from unmochan.core.symmetry import (
     map_kpoints_to_stored,
     primitive_operation,
     supercell_operation,

@@ -13,9 +13,9 @@ import numpy as np
 import pytest
 from typer.testing import CliRunner
 
-from unfoldlab.cli.main import app
-from unfoldlab.core.kpoints import fiber_kpoints
-from unfoldlab.core.mesh import (
+from unmochan.cli.main import app
+from unmochan.core.kpoints import fiber_kpoints
+from unmochan.core.mesh import (
     MeshSpec,
     diagnose_mesh,
     mesh_distance,
@@ -24,8 +24,8 @@ from unfoldlab.core.mesh import (
     unfolded_mesh,
     unfolded_mesh_points,
 )
-from unfoldlab.core.numerics import wrap_fractional
-from unfoldlab.core.transformations import TransformationMatrix
+from unmochan.core.numerics import wrap_fractional
+from unmochan.core.transformations import TransformationMatrix
 
 runner = CliRunner()
 

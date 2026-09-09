@@ -8,16 +8,16 @@ import numpy as np
 import pytest
 from synthetic_procar import write_synthetic_procar
 
-from unfoldlab.core.projections import parse_projection_selectors
-from unfoldlab.core.site_projection import (
+from unmochan.core.projections import parse_projection_selectors
+from unmochan.core.site_projection import (
     detect_layers,
     orbital_group_mask,
     projection_fractions,
     resolve_site_mask,
     resolve_site_orbital_mask,
 )
-from unfoldlab.core.structures import Structure
-from unfoldlab.io.procar import read_procar
+from unmochan.core.structures import Structure
+from unmochan.io.procar import read_procar
 
 ORBITALS = ("s", "py", "pz", "px")
 

@@ -1,6 +1,6 @@
 """Symmetry operations must belong to the crystal, not just to the lattice.
 
-`unfoldlab.core.symmetry.map_kpoints_to_stored` can only test that a supplied
+`unmochan.core.symmetry.map_kpoints_to_stored` can only test that a supplied
 operation is unimodular and compatible with the two lattices; whether the state
 stored at the representative k-point really is the symmetry image of the
 requested one is a fact about the crystal.  The mathematics is in
@@ -17,15 +17,15 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from unfoldlab.core.spacegroup import (
+from unmochan.core.spacegroup import (
     cartesian_rotation,
     detect_primitive_operations,
     site_labels,
     space_group_operations,
     validate_primitive_operations,
 )
-from unfoldlab.core.structures import Structure
-from unfoldlab.core.symmetry import map_kpoints_to_stored
+from unmochan.core.structures import Structure
+from unmochan.core.symmetry import map_kpoints_to_stored
 
 pytestmark = pytest.mark.unit
 

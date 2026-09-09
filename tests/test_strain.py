@@ -14,8 +14,8 @@ import numpy as np
 import pytest
 from typer.testing import CliRunner
 
-from unfoldlab.cli.main import app
-from unfoldlab.core.strain import (
+from unmochan.cli.main import app
+from unmochan.core.strain import (
     deformation_gradient,
     diagnose_commensurability,
     kpoint_shift,
@@ -23,7 +23,7 @@ from unfoldlab.core.strain import (
     rotation_angle,
     strain_tensor,
 )
-from unfoldlab.core.transformations import detect_transformation
+from unmochan.core.transformations import detect_transformation
 
 runner = CliRunner()
 

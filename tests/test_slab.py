@@ -15,9 +15,9 @@ import numpy as np
 import pytest
 from typer.testing import CliRunner
 
-from unfoldlab.cli.main import app
-from unfoldlab.core.plane_waves import weights_from_coefficients
-from unfoldlab.core.slab import (
+from unmochan.cli.main import app
+from unmochan.core.plane_waves import weights_from_coefficients
+from unmochan.core.slab import (
     collapse_perpendicular,
     detect_vacuum_axes,
     diagnose_slab_transform,
@@ -27,7 +27,7 @@ from unfoldlab.core.slab import (
     slab_weights_from_coefficients,
     vacuum_gap,
 )
-from unfoldlab.core.structures import Structure
+from unmochan.core.structures import Structure
 
 runner = CliRunner()
 

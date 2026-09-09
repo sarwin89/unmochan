@@ -1,7 +1,7 @@
 """First-Brillouin-zone representatives.
 
 The mathematics is in ``RequestProject/Unfolding/BrillouinZone.lean``; this file
-checks that :mod:`unfoldlab.core.brillouin` implements it: that the reduction
+checks that :mod:`unmochan.core.brillouin` implements it: that the reduction
 really is the minimum over the lattice (checked against brute force), that the
 Bragg-plane test agrees with it, that rounding is exact for an orthogonal cell
 and wrong for a hexagonal one, and that the CLI reports all of that.
@@ -17,8 +17,8 @@ import numpy as np
 import pytest
 from typer.testing import CliRunner
 
-from unfoldlab.cli.main import app
-from unfoldlab.core.brillouin import (
+from unmochan.cli.main import app
+from unmochan.core.brillouin import (
     diagnose_bz_reduction,
     has_orthogonal_reciprocal_basis,
     inscribed_radius,
@@ -28,7 +28,7 @@ from unfoldlab.core.brillouin import (
     shortest_lattice_vector_length,
     zone_boundary_distance,
 )
-from unfoldlab.core.valleys import certified_minimum_image_shift, minimum_image_distance
+from unmochan.core.valleys import certified_minimum_image_shift, minimum_image_distance
 
 pytestmark = [pytest.mark.unit]
 

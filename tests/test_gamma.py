@@ -12,8 +12,8 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from unfoldlab.core.gamma import check_half_basis, expand_gamma_half_basis
-from unfoldlab.core.plane_waves import weights_from_coefficients
+from unmochan.core.gamma import check_half_basis, expand_gamma_half_basis
+from unmochan.core.plane_waves import weights_from_coefficients
 
 
 def _half_basis() -> np.ndarray:

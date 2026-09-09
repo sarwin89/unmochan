@@ -9,9 +9,9 @@ import pytest
 from synthetic_procar import write_synthetic_procar
 from synthetic_wavecar import write_synthetic_wavecar
 
-from unfoldlab.core.kpoints import KPoint, cartesian_path_distances
-from unfoldlab.io.vasp_wfc import generate_vasp_g_vectors
-from unfoldlab.workflows.problem import UnfoldingProblem
+from unmochan.core.kpoints import KPoint, cartesian_path_distances
+from unmochan.io.vasp_wfc import generate_vasp_g_vectors
+from unmochan.workflows.problem import UnfoldingProblem
 
 ENCUT = 200.0
 SUPERCELL_LATTICE = np.diag([2.0, 1.0, 1.0])

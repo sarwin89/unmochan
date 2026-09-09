@@ -12,8 +12,8 @@ from pathlib import Path
 import numpy as np
 
 from tests.synthetic_wavecar import write_synthetic_wavecar
-from unfoldlab.io import vasp_wfc
-from unfoldlab.io.vasp_wfc import WavecarReader, generate_vasp_g_vectors
+from unmochan.io import vasp_wfc
+from unmochan.io.vasp_wfc import WavecarReader, generate_vasp_g_vectors
 
 LATTICE = np.eye(3) * 4.0
 ENCUT = 30.0

@@ -17,17 +17,17 @@ import numpy as np
 import pytest
 from typer.testing import CliRunner
 
-from unfoldlab.cli.main import app
-from unfoldlab.core.dos import (
+from unmochan.cli.main import app
+from unmochan.core.dos import (
     default_energy_grid,
     diagnose_dos_conservation,
     supercell_dos,
     unfolded_dos,
 )
-from unfoldlab.core.spectral import EffectiveBandStructure
-from unfoldlab.core.tight_binding import TightBindingModel, unfold_tight_binding_model
-from unfoldlab.core.transformations import TransformationMatrix
-from unfoldlab.io.serialization import write_ebs
+from unmochan.core.spectral import EffectiveBandStructure
+from unmochan.core.tight_binding import TightBindingModel, unfold_tight_binding_model
+from unmochan.core.transformations import TransformationMatrix
+from unmochan.io.serialization import write_ebs
 
 RNG = np.random.default_rng(20240901)
 

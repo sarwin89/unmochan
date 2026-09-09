@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from unfoldlab.core.unfolding import (
+from unmochan.core.unfolding import (
     BandUnfoldingData,
     PlaneWaveKPointData,
     compare_effective_band_structures,

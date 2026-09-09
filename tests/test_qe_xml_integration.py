@@ -15,7 +15,7 @@ import pytest
 
 from tests.synthetic_qe_xml import write_data_file_schema
 from tests.test_qe_wfc_kpoints import COEFFS, MILLER, TRANSFORM, write_synthetic_wfc_dat
-from unfoldlab.io.qe_wfc import (
+from unmochan.io.qe_wfc import (
     compute_symmetry_weights_from_qe_save,
     compute_weights_from_qe_save,
     resolve_qe_metadata,

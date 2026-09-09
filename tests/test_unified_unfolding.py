@@ -1,6 +1,6 @@
 import numpy as np
 
-from unfoldlab.core.unfolding import (
+from unmochan.core.unfolding import (
     BandUnfoldingData,
     PlaneWaveKPointData,
     compute_plane_wave_unfolding_weights,

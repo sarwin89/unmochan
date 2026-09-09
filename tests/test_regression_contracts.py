@@ -4,8 +4,8 @@ import numpy as np
 import pytest
 from typer.testing import CliRunner
 
-from unfoldlab.cli.main import app
-from unfoldlab.io.qe import BOHR_TO_ANGSTROM, read_pw_input_structure, read_weight_table
+from unmochan.cli.main import app
+from unmochan.io.qe import BOHR_TO_ANGSTROM, read_pw_input_structure, read_weight_table
 
 pytestmark = pytest.mark.unit
 

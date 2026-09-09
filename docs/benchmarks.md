@@ -21,7 +21,7 @@ weight, and it carries all of it.
 
 * checked for `N = 2, 3, 4, 5` in
   `test_perfect_chain_unfolds_to_the_primitive_band`;
-* the formal statement is `UnfoldLab.IsFiberRepr.weight_ideal`.
+* the formal statement is `IsFiberRepr.weight_ideal`.
 
 A caveat the test encodes: two members of a fiber can fold onto *degenerate*
 supercell states (for the chain, `k` and `-k` at the zone edge), and a
@@ -52,7 +52,7 @@ transform being the identity, which is worth having as a fixed point.
 Occupy exactly the plane waves that belong to one member of a fiber, and unfold
 against all three members of a `3 x 1 x 1` fiber: weight one at that member,
 zero at the other two, sum rule exactly one.  This is the numerical form of
-`UnfoldLab.IsFiberRepr.weight_ideal` and it exercises the matching kernel
+`IsFiberRepr.weight_ideal` and it exercises the matching kernel
 (`matching_g_mask`) rather than the tight-binding layer.
 
 ## 5. Chain with a defect
@@ -61,7 +61,7 @@ An on-site shift on one cell of a `4 x 1 x 1` supercell destroys the ideal case
 — the weight spreads over several states, which is the whole point of plotting
 an effective band structure — but not the sum rule: at fixed state index the
 four fiber members still share a total weight of one
-(`UnfoldLab.IsFiberRepr.sum_weight_eq_one`).  This is checked in
+(`IsFiberRepr.sum_weight_eq_one`).  This is checked in
 `test_defect_chain_conserves_the_fiber_sum_rule`.
 
 ## What is deliberately not here
@@ -73,5 +73,4 @@ four fiber members still share a total weight of one
   QE `.save` data.
 * Absolute spectral-function intensities from a PAW calculation.  The weights
   computed here are pseudo-wavefunction weights; the missing on-site
-  augmentation is documented in `docs/findings.md` and is a property of the
-  input data, not of this code.
+  augmentation is a property of the input data, not of this code.

@@ -20,3 +20,4 @@ venv/
 *.hdf5
 *.npz
 *.npy
+graphify-out/

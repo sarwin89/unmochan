@@ -9,7 +9,7 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from unfoldlab.core.lcao import (
+from unmochan.core.lcao import (
     bloch_overlap_kernel,
     diagnose_overlap_neglect,
     lcao_norms,
@@ -25,12 +25,12 @@ from unfoldlab.core.lcao import (
     unfold_lcao_path,
     validate_overlap_kernel,
 )
-from unfoldlab.core.tight_binding import (
+from unmochan.core.tight_binding import (
     TightBindingModel,
     supercell_cells,
     tight_binding_weights,
 )
-from unfoldlab.core.transformations import TransformationMatrix
+from unmochan.core.transformations import TransformationMatrix
 
 pytestmark = pytest.mark.unit
 

@@ -18,19 +18,19 @@ import pytest
 from synthetic_wavecar import write_synthetic_wavecar
 from typer.testing import CliRunner
 
-from unfoldlab.cli.main import app
-from unfoldlab.core.plane_waves import (
+from unmochan.cli.main import app
+from unmochan.core.plane_waves import (
     matching_g_mask,
     state_norms_from_coefficients,
     weights_from_coefficients,
 )
-from unfoldlab.core.unfolding import (
+from unmochan.core.unfolding import (
     StateNormDiagnostics,
     diagnose_state_norms,
     truncation_weight_error_bound,
 )
-from unfoldlab.io.qe_wfc import state_norms_from_qe_save
-from unfoldlab.io.vasp_wfc import (
+from unmochan.io.qe_wfc import state_norms_from_qe_save
+from unmochan.io.vasp_wfc import (
     generate_vasp_g_vectors,
     state_norms_from_wavecar,
 )
@@ -253,7 +253,7 @@ def test_an_unnormalized_file_is_flagged_but_gives_the_same_weights(tmp_path: Pa
     _write_wavecar(plain)
     _write_wavecar(scaled, scale=0.5)
 
-    from unfoldlab.io.vasp_wfc import compute_weights_from_wavecar
+    from unmochan.io.vasp_wfc import compute_weights_from_wavecar
 
     primitive = np.array([[0.0, 0.0, 0.0], [0.125, 0.0, 0.0]])
     args = (primitive, KPOINTS, TRANSFORM)

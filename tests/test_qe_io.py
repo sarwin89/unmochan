@@ -3,7 +3,7 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-from unfoldlab.io.qe import (
+from unmochan.io.qe import (
     PathNode,
     build_qe_path,
     interpolate_path,
@@ -18,7 +18,7 @@ from unfoldlab.io.qe import (
     write_ticks,
     write_unfolded,
 )
-from unfoldlab.io.qe_wfc import compute_weights_from_qe_save
+from unmochan.io.qe_wfc import compute_weights_from_qe_save
 
 
 def test_qe_path_interpolation_and_folding(tmp_path: Path):

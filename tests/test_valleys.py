@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from unfoldlab.core.valleys import (
+from unmochan.core.valleys import (
     ValleyDefinition,
     lattice_growth_constant,
     minimum_image_distance,

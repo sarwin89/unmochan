@@ -7,7 +7,8 @@ import json
 import numpy as np
 import pytest
 
-from unfoldlab import (
+from unmochan.cli.main import main
+from unmochan.core.degeneracy import (
     DegeneracyReport,
     average_degenerate_weights,
     degeneracy_averaged_weights,
@@ -15,10 +16,9 @@ from unfoldlab import (
     group_degenerate_bands,
     subspace_weights,
 )
-from unfoldlab.cli.main import main
-from unfoldlab.core.plane_waves import weights_from_coefficients
-from unfoldlab.core.spectral import EffectiveBandStructure
-from unfoldlab.io.serialization import read_ebs, write_ebs
+from unmochan.core.plane_waves import weights_from_coefficients
+from unmochan.core.spectral import EffectiveBandStructure
+from unmochan.io.serialization import read_ebs, write_ebs
 
 
 def test_group_degenerate_bands_partitions_indices() -> None:
@@ -191,7 +191,7 @@ def test_average_degenerate_weights_on_an_effective_band_structure() -> None:
 
 
 class TestDegeneracyCLI:
-    """`unfoldlab degeneracy` on a serialized effective band structure."""
+    """`unmochan degeneracy` on a serialized effective band structure."""
 
     @staticmethod
     def _write(path, energies, weights):

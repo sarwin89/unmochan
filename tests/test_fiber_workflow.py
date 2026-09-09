@@ -1,6 +1,6 @@
 """End-to-end: a fiber kmap makes the unfolding sum rule an exact equality.
 
-A supercell calculation on a mesh knows only its own k-points.  ``unfoldlab
+A supercell calculation on a mesh knows only its own k-points.  ``unmochan
 fiber`` turns one of them into the ``|det T|`` primitive k-points it carries and
 writes them as a kmap; feeding that kmap to the ordinary unfolding must then
 reproduce a weight sum of one per band, and the sum-rule diagnostic must see a
@@ -15,11 +15,11 @@ import numpy as np
 import pytest
 from synthetic_wavecar import write_synthetic_wavecar
 
-from unfoldlab.cli.main import main
-from unfoldlab.core.unfolding import diagnose_fiber_sum_rule
-from unfoldlab.io.qe import read_kmap
-from unfoldlab.io.vasp_wfc import generate_vasp_g_vectors
-from unfoldlab.workflows.vasp import build_vasp_effective_band_structure
+from unmochan.cli.main import main
+from unmochan.core.unfolding import diagnose_fiber_sum_rule
+from unmochan.io.qe import read_kmap
+from unmochan.io.vasp_wfc import generate_vasp_g_vectors
+from unmochan.workflows.vasp import build_vasp_effective_band_structure
 
 ENCUT = 200.0
 LATTICE = np.diag([2.0, 1.0, 1.0])

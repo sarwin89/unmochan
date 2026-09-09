@@ -17,14 +17,14 @@ from synthetic_wavecar import write_synthetic_wavecar
 from test_qe_wfc_kpoints import write_synthetic_wfc_dat
 from typer.testing import CliRunner
 
-from unfoldlab.cli.main import app
-from unfoldlab.core.unfolding import (
+from unmochan.cli.main import app
+from unmochan.core.unfolding import (
     PlaneWaveKPointData,
     compute_plane_wave_unfolding_weights,
     compute_plane_wave_unfolding_weights_chunked,
 )
-from unfoldlab.io.qe_wfc import compute_weights_from_qe_save, read_wfc_hdf5
-from unfoldlab.io.vasp_wfc import (
+from unmochan.io.qe_wfc import compute_weights_from_qe_save, read_wfc_hdf5
+from unmochan.io.vasp_wfc import (
     WavecarReader,
     compute_weights_from_wavecar,
     generate_vasp_g_vectors,
@@ -198,7 +198,7 @@ def test_chunks_must_describe_the_same_kpoint(tmp_path: Path):
 
 
 def test_cli_band_chunk_matches_default(tmp_path: Path):
-    """``unfoldlab weights --band-chunk`` writes the same table."""
+    """``unmochan weights --band-chunk`` writes the same table."""
 
     runner = CliRunner()
     wavecar = tmp_path / "WAVECAR"

@@ -1,6 +1,6 @@
 import numpy as np
 
-from unfoldlab.core.spectral import EffectiveBandStructure
+from unmochan.core.spectral import EffectiveBandStructure
 
 
 def test_spectral_function_shape_and_positive_intensity():

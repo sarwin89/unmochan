@@ -2,10 +2,10 @@ import numpy as np
 import pytest
 from synthetic_wavecar import write_synthetic_wavecar
 
-from unfoldlab.core.kpoints import KPoint
-from unfoldlab.core.structures import Structure
-from unfoldlab.io.vasp_wfc import generate_vasp_g_vectors
-from unfoldlab.twist import TwistedUnfoldingProblem, assign_layers_by_axis
+from unmochan.core.kpoints import KPoint
+from unmochan.core.structures import Structure
+from unmochan.io.vasp_wfc import generate_vasp_g_vectors
+from unmochan.twist import TwistedUnfoldingProblem, assign_layers_by_axis
 
 
 def test_assign_layers_supports_more_than_two_layers():

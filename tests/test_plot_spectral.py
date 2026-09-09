@@ -10,8 +10,8 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-from unfoldlab.core.spectral import EffectiveBandStructure
-from unfoldlab.io.plot_spectral import (
+from unmochan.core.spectral import EffectiveBandStructure
+from unmochan.io.plot_spectral import (
     plot_spectral_function,
     plot_spectral_function_svg,
     spectral_energy_grid,

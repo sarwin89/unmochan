@@ -5,7 +5,7 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from unfoldlab.core import (
+from unmochan.core import (
     PlaneWaveKPointData,
     TransformationMatrix,
     compute_plane_wave_spin_textures,
@@ -179,7 +179,7 @@ def _write_spinor_wavecar(path, *, lattice, encut, kpoints, up, down, energies):
 
     from synthetic_wavecar import write_synthetic_wavecar
 
-    from unfoldlab.io.vasp_wfc import generate_vasp_g_vectors
+    from unmochan.io.vasp_wfc import generate_vasp_g_vectors
 
     n_g = None
     blocks = []
@@ -207,7 +207,7 @@ def _write_spinor_wavecar(path, *, lattice, encut, kpoints, up, down, energies):
 def test_spin_texture_from_a_noncollinear_wavecar(tmp_path):
     """A state polarized along +y unfolds to a texture of length = its weight."""
 
-    from unfoldlab.io.vasp_wfc import (
+    from unmochan.io.vasp_wfc import (
         compute_spin_texture_from_wavecar,
         generate_vasp_g_vectors,
     )
@@ -244,7 +244,7 @@ def test_spin_texture_from_a_noncollinear_wavecar(tmp_path):
 def test_collinear_wavecar_has_no_spin_texture(tmp_path):
     from synthetic_wavecar import write_synthetic_wavecar
 
-    from unfoldlab.io.vasp_wfc import (
+    from unmochan.io.vasp_wfc import (
         compute_spin_texture_from_wavecar,
         generate_vasp_g_vectors,
     )
@@ -276,9 +276,9 @@ def test_collinear_wavecar_has_no_spin_texture(tmp_path):
 def test_weights_cli_writes_a_spin_texture_table(tmp_path):
     from typer.testing import CliRunner
 
-    from unfoldlab.cli.main import app
-    from unfoldlab.io.qe import read_spin_texture_table
-    from unfoldlab.io.vasp import write_vasp_path_files
+    from unmochan.cli.main import app
+    from unmochan.io.qe import read_spin_texture_table
+    from unmochan.io.vasp import write_vasp_path_files
 
     path_json = tmp_path / "path.json"
     kpoints_file = tmp_path / "KPOINTS"
@@ -335,8 +335,8 @@ def test_weights_cli_writes_a_spin_texture_table(tmp_path):
 def test_spin_texture_is_refused_for_symmetry_reduced_input(tmp_path):
     from typer.testing import CliRunner
 
-    from unfoldlab.cli.main import app
-    from unfoldlab.io.vasp import write_vasp_path_files
+    from unmochan.cli.main import app
+    from unmochan.io.vasp import write_vasp_path_files
 
     path_json = tmp_path / "path.json"
     kpoints_file = tmp_path / "KPOINTS"
@@ -408,7 +408,7 @@ def _write_spinor_wfc_dat(path, xk, miller, up, down):
 
 
 def test_spin_texture_from_a_noncollinear_qe_save(tmp_path):
-    from unfoldlab.io.qe_wfc import compute_spin_texture_from_qe_save
+    from unmochan.io.qe_wfc import compute_spin_texture_from_qe_save
 
     save_dir = tmp_path / "pwscf.save"
     save_dir.mkdir()

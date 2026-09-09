@@ -6,11 +6,11 @@ import numpy as np
 import pytest
 from typer.testing import CliRunner
 
-from unfoldlab.cli.main import app
-from unfoldlab.core.plane_waves import weights_from_coefficients
-from unfoldlab.core.spacegroup import detect_primitive_operations
-from unfoldlab.core.structures import Structure
-from unfoldlab.core.symmetry import map_kpoints_to_stored, supercell_operation
+from unmochan.cli.main import app
+from unmochan.core.plane_waves import weights_from_coefficients
+from unmochan.core.spacegroup import detect_primitive_operations
+from unmochan.core.structures import Structure
+from unmochan.core.symmetry import map_kpoints_to_stored, supercell_operation
 
 runner = CliRunner()
 
@@ -192,7 +192,7 @@ def test_qe_workflow_serves_the_time_reversal_partner_of_a_stored_kpoint(tmp_pat
 
     from test_qe_wfc_kpoints import write_synthetic_wfc_dat
 
-    from unfoldlab.workflows.backend import compute_backend_weights
+    from unmochan.workflows.backend import compute_backend_weights
 
     header = (
         "ik\ts_pc\tkpc_1\tkpc_2\tkpc_3\t"

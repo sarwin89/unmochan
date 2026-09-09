@@ -9,10 +9,10 @@ contract and produce the same unfolded weights within numerical tolerance.
 Run this before preparing a commit:
 
 ```bash
-python -m pytest
+python -m pytest --basetemp .tmp-pytest -p no:cacheprovider
 python -m ruff check .
-python -m compileall unfoldlab unmochan tests
-python -m pip check
+python -m mypy src/unmochan
+python -m compileall -q src/unmochan tests examples
 ```
 
 The default suite is intentionally lightweight. It uses small synthetic fixtures
@@ -79,7 +79,11 @@ For release candidates, build and install the package in a clean environment:
 ```bash
 python -m build
 python -m venv .venv-smoke
-.venv-smoke\Scripts\python -m pip install dist/*.whl
-.venv-smoke\Scripts\unmochan --help
-.venv-smoke\Scripts\unfoldlab --help
+. .venv-smoke/bin/activate
+python -m pip install dist/*.whl
+python -c "import unmochan"
+unmochan --help
 ```
+
+A release wheel must contain no `unfoldlab` package or console script. The
+version-1 serialized schema identifiers remain stable.

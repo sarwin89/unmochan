@@ -2,7 +2,7 @@ from pathlib import Path
 
 import numpy as np
 
-from unfoldlab.io.vasp import read_eigenval, read_poscar
+from unmochan.io.vasp import read_eigenval, read_poscar
 
 
 def test_read_poscar_with_species_names(tmp_path: Path):

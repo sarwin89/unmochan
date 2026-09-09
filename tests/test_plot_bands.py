@@ -17,7 +17,7 @@ import numpy as np
 import pytest
 from numpy.typing import NDArray
 
-from unfoldlab.io.plot_bands import (
+from unmochan.io.plot_bands import (
     color_from_weight,
     marker_area,
     plot_unfolded,
@@ -258,7 +258,7 @@ def test_plot_unfolded_rejects_mismatched_shapes_with_matplotlib(
 
 
 def test_the_old_import_path_still_works() -> None:
-    from unfoldlab.io import qe
+    from unmochan.io import qe
 
     assert qe.plot_unfolded is plot_unfolded
     assert qe.plot_unfolded_svg is plot_unfolded_svg
