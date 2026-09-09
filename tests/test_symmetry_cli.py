@@ -9,6 +9,7 @@ structure they are given does not support.
 
 from __future__ import annotations
 
+import re
 from pathlib import Path
 
 import numpy as np
@@ -21,6 +22,8 @@ from unmochan.cli.main import app
 runner = CliRunner()
 
 pytestmark = [pytest.mark.cli, pytest.mark.unit]
+
+_ANSI_ESCAPE = re.compile(r"\x1b\[[0-?]*[ -/]*[@-~]")
 
 TETRAGONAL_POSCAR = "\n".join(
     [
@@ -59,7 +62,8 @@ CHAIN_POSCAR = "\n".join(
 def _flat(text: str) -> str:
     """Rich wraps error text into a box; recover the flowing sentence."""
 
-    return " ".join(text.replace("\u2502", " ").split())
+    plain = _ANSI_ESCAPE.sub("", text)
+    return " ".join(plain.replace("\u2502", " ").split())
 
 
 def _write(path: Path, text: str) -> Path:
